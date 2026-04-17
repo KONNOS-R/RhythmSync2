@@ -182,7 +182,7 @@ def run_player(file_path):
 def main():
     while True:
         try:
-            Console().print('''[#00d0ff]
+            Console().print(Align.center('''[#00d0ff]
   _____  _           _   _                _____                  
  |  __ \\| |         | | | |              / ____|                 
  | |__) | |__  _   _| |_| |__  _ __ ___ | (___  _   _ _ __   ___ 
@@ -191,7 +191,7 @@ def main():
  |_|  \\_\\_| |_|\\__, |\\__|_| |_|_| |_| |_|_____/ \__, |_| |_|\\___|
                 __/ |                            __/ |           
                |___/                            |___/            
-''')
+'''))
             file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
 
             run_player(file_path)
