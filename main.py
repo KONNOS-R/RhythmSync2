@@ -10,6 +10,8 @@ from rich import box
 from mutagen import File
 import os
 from re import match
+from pathlib import Path
+
 
 #create rich layout
 def make_layout():
@@ -108,7 +110,7 @@ def format_lrc(lrc_data):
 def main():
     clear_screen()
 
-    file_path = input("audio name: ")
+    file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
 
     layout = make_layout()
 
