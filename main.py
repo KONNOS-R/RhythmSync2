@@ -7,7 +7,6 @@ from rich.progress import Progress, BarColumn, TextColumn
 from rich.live import Live
 from rich.layout import Layout
 from rich import box
-import mutagen
 from mutagen import File
 import os
 from re import match
@@ -22,12 +21,14 @@ def make_layout():
     )
     return layout
 
+#header section
 def make_header(title, artist):
         return Panel(
         Group(Align.center(f"[bold]{title}[/bold]\n"),Align.center(f"[cyan]{artist}[/cyan]")),
         style="white",
     )
 
+#lyrics section
 def make_lyrics(lyrics):
     line1, line2, line3 = lyrics
     return Align.center(Group(Align.center(f"[bold white]{line1}[/bold white]"),
@@ -41,6 +42,7 @@ def make_lyrics(lyrics):
                 vertical="middle"
                 )
 
+#player section
 def make_player():
     return Progress(
         TextColumn("{task.description}[/]", justify="right"),
@@ -82,7 +84,6 @@ def get_lrc(file_path):
         for tag_name in lrc_tag_names:
             if tag_name in audio:
                 return audio[tag_name][0]
-
         return None
 
     except Exception as e:
@@ -106,9 +107,10 @@ def format_lrc(lrc_data):
 #main programme
 def main():
     clear_screen()
-    layout = make_layout()
 
-    file_path = "test.flac"
+    file_path = input("audio name: ")
+
+    layout = make_layout()
 
     pygame.mixer.init()
     pygame.mixer.music.load(file_path)
@@ -118,25 +120,25 @@ def main():
     print(format_time(total_length))
 
     raw_lrc = get_lrc(file_path)
+
     title, artist, lyrics = format_lrc(raw_lrc)
     print("title:", title)
     print("artist:", artist)
     print("lyrics:", lyrics)
 
+#'''
     layout["header"].update(make_header(title, artist))
 
-#'''
+    layout["lyrics"].update("")
+
     progress = make_player()
-    
     layout["player"].update(progress)
 
-    with Live(layout, refresh_per_second=30):
+    with Live(layout, refresh_per_second=100):
         playback = progress.add_task(
         f"[red]< [#00d0ff]",
         total=total_length, 
         suffix="[#00d0ff] [red]>")
-
-        layout["lyrics"].update("")
 
         lyric_index = 0
 
