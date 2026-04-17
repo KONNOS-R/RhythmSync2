@@ -43,9 +43,9 @@ def get_lrc(file_path):
 def format_lrc(lrc_data):
     timestamp = r"^\[\d{2}:\d{2}\.\d{2}\]"
     lrc_lines = lrc_data.split("\n")
-    title = [line for line in lrc_lines if line[:4] == "[ti:"][0]
-    artist = [line for line in lrc_lines if line[:4] == "[ar:"][0]
-    lyrics = [line for line in lrc_lines if match(timestamp, line)]
+    title = [line[4:-1] for line in lrc_lines if line[:4] == "[ti:"][0]
+    artist = [line[4:-1] for line in lrc_lines if line[:4] == "[ar:"][0]
+    lyrics = [line[10:] for line in lrc_lines if match(timestamp, line)]
     return title, artist, lyrics
 
 #main programme
