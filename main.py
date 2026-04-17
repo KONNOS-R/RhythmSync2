@@ -28,8 +28,18 @@ def make_header(title, artist):
         style="white",
     )
 
-def make_lyrics():
-    pass
+def make_lyrics(lyrics):
+    line1, line2, line3 = lyrics
+    return Align.center(Group(Align.center(f"[bold white]{line1}[/bold white]"),
+                Align.center(f"[bold cyan]{line2}[/bold cyan]"),
+                Align.center(f"[bold white]{line3}[/bold white]")
+                ),
+            vertical="middle"
+    )
+                 
+    Align.center(f"[bold white]{line1}[/bold white]",
+                vertical="middle"
+                )
 
 def make_player():
     return Progress(
@@ -49,6 +59,14 @@ def format_time(milliseconds):
     mil = milliseconds % 1000
     hund = int(mil // 10)
     return f"{min:02}:{sec:02}.{hund:02}"
+
+#format time to milliseconds
+def unformat_time(time_str):
+    min, sec = time_str.split(":")
+    sec, hund = sec.split(".")
+    milliseconds = (
+        int(min) * 60 * 1000 + int(sec) * 1000 + int(hund) * 10)
+    return milliseconds
 
 #get lrc data from the audio file
 def get_lrc(file_path):
@@ -77,7 +95,12 @@ def format_lrc(lrc_data):
     lrc_lines = lrc_data.split("\n")
     title = [line[4:-1] for line in lrc_lines if line[:4] == "[ti:"][0]
     artist = [line[4:-1] for line in lrc_lines if line[:4] == "[ar:"][0]
-    lyrics = {line[1:9]:line[10:] for line in lrc_lines if match(timestamp, line)}
+    lyrics = [[line[1:9],line[10:]] for line in lrc_lines if match(timestamp, line)]
+    lyrics.insert(0,['00:00.00', ""])
+    for x in lyrics:
+        if x[1] == "":
+            x[1] = "♫"
+    lyrics.append(["", ""])
     return title, artist, lyrics
 
 #main programme
@@ -112,13 +135,18 @@ def main():
         f"[red]< [#00d0ff]",
         total=total_length, 
         suffix="[#00d0ff] [red]>")
-    
+
+        layout["lyrics"].update("")
+
         lyric_index = 0
 
         while pygame.mixer.music.get_busy(): #music starts
             current_time = pygame.mixer.music.get_pos()
 
-            #if
+            if lyric_index < len(lyrics)-1:
+                if unformat_time(lyrics[lyric_index][0]) <= current_time:
+                    layout["lyrics"].update(make_lyrics((lyrics[lyric_index-1][1], lyrics[lyric_index][1], lyrics[lyric_index+1][1])))
+                    lyric_index += 1
 
             progress.update(playback, 
                             completed=current_time,
