@@ -1,8 +1,12 @@
 import pygame
 from rich.console import Console
+from rich.console import Group
+from rich.panel import Panel
+from rich.align import Align
 from rich.progress import Progress, BarColumn, TextColumn
 from rich.live import Live
 from rich.layout import Layout
+from rich import box
 import mutagen
 from mutagen import File
 import os
@@ -12,10 +16,27 @@ from re import match
 def make_layout():
     layout = Layout()
     layout.split_column(
-        Layout(name="main", ratio=1),
+        Layout(name="header", size=5),
+        Layout(name="lyrics", ratio=1),
         Layout(name="player", size=3)
     )
     return layout
+
+def make_header(title, artist):
+        return Panel(
+        Group(Align.center(f"[bold]{title}[/bold]\n"),Align.center(f"[cyan]{artist}[/cyan]")),
+        style="white",
+    )
+
+def make_lyrics():
+    pass
+
+def make_player():
+    return Progress(
+        TextColumn("{task.description}[/]", justify="right"),
+        BarColumn(bar_width=None),
+        TextColumn("{task.fields[suffix]}", justify="right"),
+    )
 
 #clear the terminal
 def clear_screen():
@@ -56,7 +77,7 @@ def format_lrc(lrc_data):
     lrc_lines = lrc_data.split("\n")
     title = [line[4:-1] for line in lrc_lines if line[:4] == "[ti:"][0]
     artist = [line[4:-1] for line in lrc_lines if line[:4] == "[ar:"][0]
-    lyrics = [line[10:] for line in lrc_lines if match(timestamp, line)]
+    lyrics = {line[1:9]:line[10:] for line in lrc_lines if match(timestamp, line)}
     return title, artist, lyrics
 
 #main programme
@@ -79,14 +100,10 @@ def main():
     print("artist:", artist)
     print("lyrics:", lyrics)
 
-    
+    layout["header"].update(make_header(title, artist))
 
 #'''
-    progress = Progress(
-            TextColumn("{task.description}[/]", justify="right"),
-            BarColumn(bar_width=None),
-            TextColumn("{task.fields[suffix]}", justify="right"),
-        )
+    progress = make_player()
     
     layout["player"].update(progress)
 
