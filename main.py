@@ -8,7 +8,6 @@ from rich.align import Align
 from rich.progress import Progress, BarColumn, TextColumn
 from rich.live import Live
 from rich.layout import Layout
-from rich import box
 from mutagen import File
 from re import match
 from pathlib import Path
@@ -18,7 +17,7 @@ from pathlib import Path
 def make_layout():
     layout = Layout()
     layout.split_column(
-        Layout(name="header", size=5),
+        Layout(name="header", size=4),
         Layout(name="lyrics", ratio=1),
         Layout(name="player", size=3)
     )
@@ -27,7 +26,7 @@ def make_layout():
 #header section
 def make_header(title, artist):
         return Panel(
-        Group(Align.center(f"[bold]{title}[/bold]\n"),Align.center(f"[cyan]{artist}[/cyan]")),
+        Group(Align.center(f"[bold]{title}[/bold]"),Align.center(f"[cyan]{artist}[/cyan]")),
         style="white",
     )
 
@@ -183,6 +182,16 @@ def run_player(file_path):
 def main():
     while True:
         try:
+            Console().print('''[#00d0ff]
+  _____  _           _   _                _____                  
+ |  __ \\| |         | | | |              / ____|                 
+ | |__) | |__  _   _| |_| |__  _ __ ___ | (___  _   _ _ __   ___ 
+ |  _  /| '_ \\| | | | __| '_ \\| '_ ` _ \\ \___ \\| | | | '_ \\ / __|
+ | | \\ \\| | | | |_| | |_| | | | | | | | |____) | |_| | | | | (__ 
+ |_|  \\_\\_| |_|\\__, |\\__|_| |_|_| |_| |_|_____/ \__, |_| |_|\\___|
+                __/ |                            __/ |           
+               |___/                            |___/            
+''')
             file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
 
             run_player(file_path)
