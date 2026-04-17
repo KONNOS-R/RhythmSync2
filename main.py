@@ -1,10 +1,21 @@
 import pygame
-from rich.progress import Progress, BarColumn, TextColumn
 from rich.console import Console
+from rich.progress import Progress, BarColumn, TextColumn
+from rich.live import Live
+from rich.layout import Layout
 import mutagen
 from mutagen import File
 import os
 from re import match
+
+#create rich layout
+def make_layout():
+    layout = Layout()
+    layout.split_column(
+        Layout(name="main", ratio=1),
+        Layout(name="player", size=3)
+    )
+    return layout
 
 #clear the terminal
 def clear_screen():
@@ -51,6 +62,7 @@ def format_lrc(lrc_data):
 #main programme
 def main():
     clear_screen()
+    layout = make_layout()
 
     file_path = "test.flac"
 
@@ -67,20 +79,24 @@ def main():
     print("artist:", artist)
     print("lyrics:", lyrics)
 
-
-'''
-    lyric_index = 0
     
-    with Progress(
+
+#'''
+    progress = Progress(
             TextColumn("{task.description}[/]", justify="right"),
             BarColumn(bar_width=None),
             TextColumn("{task.fields[suffix]}", justify="right"),
-        ) as progress:
+        )
+    
+    layout["player"].update(progress)
 
+    with Live(layout, refresh_per_second=30):
         playback = progress.add_task(
-        f"[#03ad00]Playing: [white]{file_path} [red]< [#00d0ff]",
+        f"[red]< [#00d0ff]",
         total=total_length, 
         suffix="[#00d0ff] [red]>")
+    
+        lyric_index = 0
 
         while pygame.mixer.music.get_busy(): #music starts
             current_time = pygame.mixer.music.get_pos()
@@ -89,11 +105,11 @@ def main():
 
             progress.update(playback, 
                             completed=current_time,
-                            description=f"[#03ad00]Playing: [white]{file_path} [red]< [#00d0ff]{format_time(current_time)}",
+                            description=f"[red]< [#00d0ff]{format_time(current_time)}",
                             suffix=f"[#00d0ff]{format_time(total_length - current_time)} [red]>"
                             )
 
-'''
+#'''
 
 
 
