@@ -39,10 +39,6 @@ def make_lyrics(lyrics):
                 ),
             vertical="middle"
     )
-                 
-    Align.center(f"[bold white]{line1}[/bold white]",
-                vertical="middle"
-                )
 
 #player section
 def make_player():
@@ -71,6 +67,23 @@ def unformat_time(time_str):
     milliseconds = (
         int(min) * 60 * 1000 + int(sec) * 1000 + int(hund) * 10)
     return milliseconds
+
+#get metadata
+def get_metadata(file_path):
+    try:
+        audio = File(file_path)
+
+        if audio is None:
+            return "Unknown Title", "Unknown Artist"
+        
+        title = audio.get("title", ["Unknown Title"])[0]
+        artist = audio.get("artist", ["Unknown Artist"])[0]
+
+        return title, artist
+    
+    except Exception as e:
+        print(f"Error extracting metadata: {e}")
+        return "Unknown Title", "Unknown Artist"
 
 #get lrc data from the audio file
 def get_lrc(file_path):
@@ -104,13 +117,16 @@ def format_lrc(lrc_data):
         if x[1] == "":
             x[1] = "♫"
     lyrics.append(["", ""])
-    return title, artist, lyrics
+    return lyrics
 
 #main programme
 def main():
     clear_screen()
 
     file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
+
+    #audio = File(file_path)
+    #print(audio)
 
     layout = make_layout()
 
@@ -121,17 +137,25 @@ def main():
     total_length = int(pygame.mixer.Sound(file_path).get_length()*1000)
     print(format_time(total_length))
 
-    raw_lrc = get_lrc(file_path)
-
-    title, artist, lyrics = format_lrc(raw_lrc)
+    title, artist = get_metadata(file_path)
+    
     print("title:", title)
     print("artist:", artist)
-    print("lyrics:", lyrics)
+
+    lyrics_exist = False
+
+    raw_lrc = get_lrc(file_path)
+
+    if raw_lrc is not None:
+        lyrics = format_lrc(raw_lrc)
+        lyrics_exist = True
+
+        print("lyrics:", lyrics)
 
 #'''
     layout["header"].update(make_header(title, artist))
 
-    layout["lyrics"].update("")
+    layout["lyrics"].update(Align.center("No lyrics to display", vertical="middle"))
 
     progress = make_player()
     layout["player"].update(progress)
@@ -147,7 +171,7 @@ def main():
         while pygame.mixer.music.get_busy(): #music starts
             current_time = pygame.mixer.music.get_pos()
 
-            if lyric_index < len(lyrics)-1:
+            if lyrics_exist and lyric_index < len(lyrics)-1:
                 if unformat_time(lyrics[lyric_index][0]) <= current_time:
                     layout["lyrics"].update(make_lyrics((lyrics[lyric_index-1][1], lyrics[lyric_index][1], lyrics[lyric_index+1][1])))
                     lyric_index += 1
@@ -163,4 +187,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
