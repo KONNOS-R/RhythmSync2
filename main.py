@@ -224,8 +224,11 @@ def main():
             #help command
             if command == "help":
                 print('''command list:
-    help  - Lists all commands.
-    play {path} - Plays the audio file located at the specified {path}
+    help  - Lists all available commands.
+    play {path}  - Plays the audio file located at the specified {path}.
+    info {path} {tags} - Displays metadata for the file at {path}.
+        If {tags} is provided (separate with space for multiple tags), shows only those specific tags and their respective values.
+        If {tags} is omitted or empty, shows all available tags and their respective values.
     '''
                       )
             
