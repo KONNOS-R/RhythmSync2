@@ -13,17 +13,6 @@ from re import match
 from pathlib import Path
 
 
-#*****COMMANDS*****
-#help
-def help():
-    return '''command list:
-    help  - Lists all commands.
-    play {path} - Plays the audio file located at the specified {path}
-    '''
-
-
-
-
 #create rich layout
 def make_layout():
     layout = Layout()
@@ -80,8 +69,40 @@ def unformat_time(time_str):
         int(min) * 60 * 1000 + int(sec) * 1000 + int(hund) * 10)
     return milliseconds
 
-#get metadata
-def get_metadata(file_path):
+#get meatadata
+def get_metadata(file_path, tags = None):
+    try:
+        audio = File(file_path)
+
+        if audio is None:
+            print(f"Error: Could not open file {file_path}")
+            return None
+        
+        lines = []
+
+        if tags is None:
+            for key, value in audio.items():
+                if isinstance(value, list):
+                    value = "; ".join(str(v) for v in value)
+
+                    lines.append(f"[green]{key}[/green]: {value}")
+        else:
+            for key, value in audio.items():
+                if isinstance(value, list):
+
+                    if key in tags:
+                        value = "; ".join(str(v) for v in value)
+
+                        lines.append(f"[green]{key}[/green]: {value}")
+        
+        return "\n".join(lines)
+    
+    except Exception as e:
+        print(f"Error extracting metadata: {e}")
+        return None
+
+#get title and artist info
+def get_ti_ar(file_path):
     try:
         audio = File(file_path)
 
@@ -139,7 +160,7 @@ def run_player(file_path):
 
         total_length = int(pygame.mixer.Sound(file_path).get_length()*1000)
 
-        title, artist = get_metadata(file_path)
+        title, artist = get_ti_ar(file_path)
 
         lyrics_exist = False
         raw_lrc = get_lrc(file_path)
@@ -202,12 +223,15 @@ def main():
 
             #help command
             if command == "help":
-                print(help())
+                print('''command list:
+    help  - Lists all commands.
+    play {path} - Plays the audio file located at the specified {path}
+    '''
+                      )
             
-            #track command
+            #play command
             elif command[:4] == "play":
                 if command[4:].lstrip() != "":
-                    #print(str(Path(command[4:].lstrip()).expanduser().resolve()))
                     file_path = str(Path(command[4:].lstrip()).expanduser().resolve())
                     if os.path.exists(file_path):
                         run_player(file_path)
@@ -217,7 +241,27 @@ def main():
                         print("Please enter a valid file path.")
                 else:
                     print("Please enter a valid file path.")
-
+            
+            elif command[:4] == "info":
+                if command[4:].lstrip() != "":
+                    try:
+                        par1, par2 = command[4:].lstrip().split(maxsplit=1)
+                        try:
+                            par2 = tuple(par2.split())
+                        except ValueError:
+                            par2 = (par2,)
+                    except ValueError:
+                        par1 = command[4:].lstrip()
+                        par2 = None
+                    file_path = str(Path(par1).expanduser().resolve())
+                    if os.path.exists(file_path):
+                        Console().print(get_metadata(file_path, (par2)), highlight=False)
+                    else:
+                        print("Please enter a valid file path and parameters.")
+                else:
+                    print("Please enter a valid file path and parameters.")
+            
+            #invalid command
             else:
                 print("Invalid command! Enter 'help' to display command list.")
                 
