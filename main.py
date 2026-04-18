@@ -26,18 +26,19 @@ def make_layout():
 #header section
 def make_header(title, artist):
         return Panel(
-        Group(Align.center(f"[bold]{title}[/bold]"),Align.center(f"[cyan]{artist}[/cyan]")),
+        Group(Align.center(f"[bold]{title}[/bold]"),Align.center(f"[#5900ab]{artist}[/#5900ab]")),
         style="white",
     )
 
 #lyrics section
 def make_lyrics(lyrics):
     line1, line2, line3 = lyrics
-    return Align.center(Group(Align.center(f"[bold white]{line1}[/bold white]"),
-                Align.center(f"[bold cyan]{line2}[/bold cyan]"),
-                Align.center(f"[bold white]{line3}[/bold white]")
-                ),
-            vertical="middle"
+    return Align.center(Group(
+            Align.center(f"[bold white]{line1}[/bold white]"),
+            Align.center(f"[bold #00d0ff]{line2}[/bold #00d0ff]"),
+            Align.center(f"[bold white]{line3}[/bold white]")
+            ),
+        vertical="middle"
     )
 
 #player section
@@ -127,20 +128,13 @@ def run_player(file_path):
 
         total_length = int(pygame.mixer.Sound(file_path).get_length()*1000)
 
-        print(format_time(total_length))
-
         title, artist = get_metadata(file_path)
-
-        print("title:", title)
-        print("artist:", artist)
 
         lyrics_exist = False
         raw_lrc = get_lrc(file_path)
         if raw_lrc is not None:
             lyrics = format_lrc(raw_lrc)
             lyrics_exist = True
-
-            print("lyrics:", lyrics)
 
         clear_screen()
         
