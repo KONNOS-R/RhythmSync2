@@ -13,6 +13,17 @@ from re import match
 from pathlib import Path
 
 
+#*****COMMANDS*****
+#help
+def help():
+    return '''command list:
+    help  - Lists all commands.
+    play {path} - Plays the audio file located at the specified {path}
+    '''
+
+
+
+
 #create rich layout
 def make_layout():
     layout = Layout()
@@ -174,9 +185,7 @@ def run_player(file_path):
 
 #main program
 def main():
-    while True:
-        try:
-            Console().print(Align.center('''[#5900ab]
+    rhythmsync_ascii ='''[#5900ab]
 [#5900ab] _____  _           _   _                [#00d0ff]_____                  
 [#5900ab]|  __ \\| |         | | | |              [#00d0ff]/ ____|                 
 [#5900ab]| |__) | |__  _   _| |_| |__  _ __ ___ [#00d0ff]| (___  _   _ _ __   ___ 
@@ -185,12 +194,42 @@ def main():
 [#5900ab]|_|  \\_\\_| |_|\\__, |\\__|_| |_|_| |_| |_|[#00d0ff]_____/ \__, |_| |_|\\___|
 [#5900ab]               __/ |                         [#00d0ff]   __/ |           
 [#5900ab]              |___/                           [#00d0ff] |___/            
-'''))
-            file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
+'''
+    Console().print(Align.center(rhythmsync_ascii))
+    while True:
+        try:
+            command = input(">").strip()
 
-            run_player(file_path)
+            #help command
+            if command == "help":
+                print(help())
+            
+            #track command
+            elif command[:4] == "play":
+                if command[4:].lstrip() != "":
+                    #print(str(Path(command[4:].lstrip()).expanduser().resolve()))
+                    file_path = str(Path(command[4:].lstrip()).expanduser().resolve())
+                    if os.path.exists(file_path):
+                        run_player(file_path)
+                        clear_screen()
+                        Console().print(Align.center(rhythmsync_ascii))
+                    else:
+                        print("Please enter a valid file path.")
+                else:
+                    print("Please enter a valid file path.")
 
-            clear_screen()
+            else:
+                print("Invalid command! Enter 'help' to display command list.")
+                
+
+
+
+
+            #file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
+
+            #run_player(file_path)
+
+            #clear_screen()
 
         except KeyboardInterrupt:
             print(f"Exitting...")
