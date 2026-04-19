@@ -142,7 +142,7 @@ def get_lrc(file_path):
 def format_lrc(lrc_data):
     timestamp = r"^\[\d{2}:\d{2}\.\d{2}\]"
     lrc_lines = lrc_data.split("\n")
-    lyrics = [[line[1:9],line[10:]] for line in lrc_lines if match(timestamp, line)]
+    lyrics = [[line[1:9],line[10:].strip()] for line in lrc_lines if match(timestamp, line)]
     lyrics.insert(0,['00:00.00', ""])
     for x in lyrics:
         if x[1] == "":
@@ -223,12 +223,12 @@ def main():
 
             #help command
             if command == "help":
-                print('''command list:
-    help  - Lists all available commands.
-    play {path}  - Plays the audio file located at the specified {path}.
-    info {path} {tags} - Displays metadata for the file at {path}.
-        If {tags} is provided (separate with space for multiple tags), shows only those specific tags and their respective values.
-        If {tags} is omitted or empty, shows all available tags and their respective values.
+                Console().print('''command list:
+    [green]help[/green] - Lists all available commands.
+    [green]play[/green] [cyan]{path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
+    [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
+        If [cyan]{tags}[/cyan] is provided (separate with space for multiple tags), shows only those specific tags and their respective values.
+        If [cyan]{tags}[/cyan] is omitted or empty, shows all available tags and their respective values.
     '''
                       )
             
