@@ -149,7 +149,7 @@ def format_lrc(lrc_data):
             x[1] = "♫"
     return lyrics
 
-
+#music player
 def run_player(file_path):
     try:
         layout = make_layout()
@@ -219,70 +219,70 @@ def main():
     Console().print(Align.center(rhythmsync_ascii))
     while True:
         try:
-            command = input(">").strip()
-
-            #help command
-            if command == "help":
-                Console().print('''command list:
-    [green]help[/green] - Lists all available commands.
-    [green]play[/green] [cyan]{path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
-    [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
-        If [cyan]{tags}[/cyan] is provided (separate with space for multiple tags), shows only those specific tags and their respective values.
-        If [cyan]{tags}[/cyan] is omitted or empty, shows all available tags and their respective values.
-    '''
-                      )
+            raw_command = input(">")
             
-            #play command
-            elif command[:4] == "play":
-                if command[4:].lstrip() != "":
-                    file_path = str(Path(command[4:].lstrip()).expanduser().resolve())
-                    if os.path.exists(file_path):
-                        run_player(file_path)
-                        clear_screen()
-                        Console().print(Align.center(rhythmsync_ascii))
+            
+            if raw_command.strip():
+                command = raw_command.split()
+                command_parts = len(command)
+            
+                #help command
+                if command[0] == "help":
+                    Console().print('''command list:
+        [green]help[/green] - Lists all available commands.
+        [green]play[/green] [cyan]{path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
+        [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
+            If [cyan]{tags}[/cyan] is provided (separate with space for multiple tags), shows only those specific tags and their respective values.
+            If [cyan]{tags}[/cyan] is omitted or empty, shows all available tags and their respective values.
+        '''
+                          )
+                
+                #play command
+                elif command[0] == "play":
+                    if command_parts == 2:
+                        file_path = str(Path(command[1]).expanduser().resolve())
+                        if os.path.exists(file_path):
+                            run_player(file_path)
+                            clear_screen()
+                            Console().print(Align.center(rhythmsync_ascii))
+                        else:
+                            print("Please enter a valid file path.")
                     else:
                         print("Please enter a valid file path.")
-                else:
-                    print("Please enter a valid file path.")
-            
-            elif command[:4] == "info":
-                if command[4:].lstrip() != "":
-                    try:
-                        par1, par2 = command[4:].lstrip().split(maxsplit=1)
-                        try:
-                            par2 = tuple(par2.split())
-                        except ValueError:
-                            par2 = (par2,)
-                    except ValueError:
-                        par1 = command[4:].lstrip()
-                        par2 = None
-                    file_path = str(Path(par1).expanduser().resolve())
-                    if os.path.exists(file_path):
-                        Console().print(get_metadata(file_path, (par2)), highlight=False)
+                
+                #info command
+                elif command[0] == "info":
+                    if command_parts >= 2:
+                       file_path, *par = command[1:]
+                       par = tuple(par) if par else None
+                       file_path = Path(file_path).expanduser().resolve()
+                       if os.path.exists(file_path):
+                           Console().print(get_metadata(file_path, par), highlight=False)
+                       else:
+                           print("Please enter a valid file path.")
                     else:
                         print("Please enter a valid file path and parameters.")
-                else:
-                    print("Please enter a valid file path and parameters.")
-            
-            #invalid command
-            else:
-                print("Invalid command! Enter 'help' to display command list.")
                 
-
-
-
-
-            #file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
-
-            #run_player(file_path)
-
-            #clear_screen()
-
+                #invalid command
+                else:
+                    print("Invalid command! Enter 'help' to display command list.")
+                    
+    
+    
+    
+    
+                #file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
+    
+                #run_player(file_path)
+    
+                #clear_screen()
+    
         except KeyboardInterrupt:
             print(f"Exitting...")
             break
         except BaseException as e:
             clear_screen()
+            Console().print(Align.center(rhythmsync_ascii))
             print(f"Error: {e}")
     
 
