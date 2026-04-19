@@ -253,9 +253,8 @@ def main():
                 #info command
                 elif command[0] == "info":
                     if command_parts >= 2:
-                       file_path, *par = command[1:]
-                       par = tuple(par) if par else None
-                       file_path = Path(file_path).expanduser().resolve()
+                       file_path = Path(command[1]).expanduser().resolve()
+                       par = tuple(command[2:]) or None
                        if os.path.exists(file_path):
                            Console().print(get_metadata(file_path, par), highlight=False)
                        else:
