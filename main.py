@@ -11,6 +11,7 @@ from rich.layout import Layout
 from mutagen import File
 from re import match
 from pathlib import Path
+import shlex
 
 
 #create rich layout
@@ -177,7 +178,7 @@ def run_player(file_path):
         progress = make_player()
         layout["player"].update(progress)
 
-        with Live(layout, refresh_per_second=100):
+        with Live(layout, refresh_per_second=60):
             playback = progress.add_task(
             f"[red]< [#00d0ff]",
             total=total_length, 
@@ -221,9 +222,8 @@ def main():
         try:
             raw_command = input(">")
             
-            
             if raw_command.strip():
-                command = raw_command.split()
+                command = shlex.split(raw_command)
                 command_parts = len(command)
             
                 #help command
