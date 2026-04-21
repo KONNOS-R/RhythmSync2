@@ -25,10 +25,22 @@ def make_layout():
     return layout
 
 #header section
-def make_header(title, artist):
+def make_header(title, artist, mode = None):
+        if mode == "r":
+            return Panel(
+                Group(
+                    Align.center(f"[bold]{title}[/bold]"),
+                    Align.center(f"[#5900ab]{artist}[/#5900ab]")
+                    ),
+            title="⭮",
+            title_align="right",
+            style="white",
+            )
+
         return Panel(
-        Group(Align.center(f"[bold]{title}[/bold]"),Align.center(f"[#5900ab]{artist}[/#5900ab]")),
-        style="white",
+        Group(Align.center(f"[bold]{title}[/bold]"),
+              Align.center(f"[#5900ab]{artist}[/#5900ab]")),
+              style="white",
     )
 
 #lyrics section
@@ -151,7 +163,8 @@ def format_lrc(lrc_data):
     return lyrics
 
 #music player
-def run_player(file_path):
+def run_player(file_path, mode = None):
+    global repeat
     try:
         layout = make_layout()
 
@@ -171,14 +184,14 @@ def run_player(file_path):
 
         clear_screen()
         
-        layout["header"].update(make_header(title, artist))
+        layout["header"].update(make_header(title, artist, mode))
 
         layout["lyrics"].update(Align.center("No lyrics to display", vertical="middle"))
 
         progress = make_player()
         layout["player"].update(progress)
 
-        with Live(layout, refresh_per_second=60):
+        with Live(layout, refresh_per_second=100):
             playback = progress.add_task(
             f"[red]< [#00d0ff]",
             total=total_length, 
@@ -200,6 +213,7 @@ def run_player(file_path):
                                 suffix=f"[#00d0ff]{format_time(total_length - current_time)} [red]>"
                                 )
     except KeyboardInterrupt:
+        repeat = False
         clear_screen()
         print(f"Exitting...")
         pygame.mixer.music.stop()
@@ -230,10 +244,12 @@ def main():
                 if command[0] == "help":
                     Console().print('''command list:
         [green]help[/green] - Lists all available commands.
-        [green]play[/green] [cyan]{path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
+        [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
+            If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
+            If [cyan]{par}[/cyan] is omitted, the audio file plays once.
         [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
-            If [cyan]{tags}[/cyan] is provided (separate with space for multiple tags), shows only those specific tags and their respective values.
-            If [cyan]{tags}[/cyan] is omitted or empty, shows all available tags and their respective values.
+            If [cyan]{tags}[/cyan] is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.
+            If [cyan]{tags}[/cyan] is omitted, shows all available tags and their respective values.
         '''
                           )
                 
@@ -247,6 +263,19 @@ def main():
                             Console().print(Align.center(rhythmsync_ascii))
                         else:
                             print("Please enter a valid file path.")
+                    elif command_parts == 3:
+                        par = command[1]
+                        file_path = str(Path(command[2]).expanduser().resolve())
+
+                        if os.path.exists(file_path) and par == "-r":
+                            global repeat
+                            repeat = True
+                            while repeat:
+                                run_player(file_path, 'r')
+                                clear_screen()
+                                Console().print(Align.center(rhythmsync_ascii))
+                        else:
+                            print("Please enter a valid file path.") 
                     else:
                         print("Please enter a valid file path.")
                 
