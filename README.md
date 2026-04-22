@@ -1,9 +1,11 @@
-I am too lazy to write this rn so you only get a command list for now.
+RhythmSync
+CLI audio player that plays music while displaying synchronized lyrics (LRC).
 
 command list:
 help - Lists all available commands.
 play {par} {path} - Plays the audio file located at the specified {path}.
     If {par} is "-r", the audio file plays in repeat until stopped.
+    If {par} is "-d" and {path} is a directory, the audio files of given directory play in alphabetic order.
     If {par} is omitted, the audio file plays once.
 info {path} {tags} - Displays metadata for the file at {path}.
     If {tags} is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.

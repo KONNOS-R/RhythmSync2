@@ -245,6 +245,7 @@ def main():
         [green]help[/green] - Lists all available commands.
         [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
             If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
+            If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order.
             If [cyan]{par}[/cyan] is omitted, the audio file plays once.
         [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
             If [cyan]{tags}[/cyan] is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.
