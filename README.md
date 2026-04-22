@@ -3,6 +3,7 @@ CLI audio player that plays music while displaying synchronized lyrics (LRC).
 
 command list:
 help - Lists all available commands.
+clear - Clears the terminal.
 play {par} {path} - Plays the audio file located at the specified {path}.
     If {par} is "-r", the audio file plays in repeat until stopped.
     If {par} is "-d" and {path} is a directory, the audio files of given directory play in alphabetic order.

@@ -240,9 +240,10 @@ def main():
                 command_parts = len(command)
             
                 #help command
-                if command[0] == "help":
+                if command[0] == "help" and command_parts == 1:
                     Console().print('''command list:
         [green]help[/green] - Lists all available commands.
+        [green]clear[/green] - Clears the terminal.
         [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
             If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
             If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order.
@@ -251,7 +252,12 @@ def main():
             If [cyan]{tags}[/cyan] is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.
             If [cyan]{tags}[/cyan] is omitted, shows all available tags and their respective values.
         '''
-                          )
+                                    )
+                
+                #clear command
+                elif command[0] == "clear" and command_parts == 1:
+                    clear_screen()
+                    Console().print(Align.center(rhythmsync_ascii))
                 
                 #play command
                 elif command[0] == "play":
@@ -266,7 +272,6 @@ def main():
                     elif command_parts == 3:
                         par = command[1]
                         file_path = str(Path(command[2]).expanduser().resolve())
-
                         if os.path.exists(file_path):
                             if par == "-r":
                                 global repeat
@@ -305,19 +310,13 @@ def main():
                            print("Please enter a valid file path.")
                     else:
                         print("Please enter a valid file path and parameters.")
-                
+
                 #invalid command
                 else:
                     print("Invalid command! Enter 'help' to display command list.")
                     
-    
-    
-    
-    
                 #file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
-    
                 #run_player(file_path)
-    
                 #clear_screen()
     
         except KeyboardInterrupt:
