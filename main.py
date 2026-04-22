@@ -218,7 +218,6 @@ def run_player(file_path, mode = None):
         print(f"Exitting...")
         pygame.mixer.music.stop()
         
-
 #main program
 def main():
     rhythmsync_ascii ='''[#5900ab]
@@ -267,17 +266,32 @@ def main():
                         par = command[1]
                         file_path = str(Path(command[2]).expanduser().resolve())
 
-                        if os.path.exists(file_path) and par == "-r":
-                            global repeat
-                            repeat = True
-                            while repeat:
-                                run_player(file_path, 'r')
+                        if os.path.exists(file_path):
+                            if par == "-r":
+                                global repeat
+                                repeat = True
+                                while repeat:
+                                    run_player(file_path, 'r')
+                                clear_screen()
+                                Console().print(Align.center(rhythmsync_ascii))
+                            elif par == "-d":
+                                extensions = (".mp3", ".flac", ".wav", ".ogg", ".m4a")
+                                audio_files = [
+                                f for f in Path(file_path).iterdir()
+                                if f.suffix.lower() in extensions
+                                ]
+                                audio_files.sort()
+                                repeat = True
+                                for file in audio_files:
+                                    run_player(file)
+                                    if repeat == False:
+                                        break
                                 clear_screen()
                                 Console().print(Align.center(rhythmsync_ascii))
                         else:
                             print("Please enter a valid file path.") 
                     else:
-                        print("Please enter a valid file path.")
+                        print("Please enter a valid file path and parameters.")
                 
                 #info command
                 elif command[0] == "info":
