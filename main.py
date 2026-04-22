@@ -36,6 +36,16 @@ def make_header(title, artist, mode = None):
             title_align="right",
             style="white",
             )
+        elif mode == "d":
+            return Panel(
+                Group(
+                    Align.center(f"[bold]{title}[/bold]"),
+                    Align.center(f"[#5900ab]{artist}[/#5900ab]")
+                    ),
+            title="➜",
+            title_align="right",
+            style="white",
+            )
 
         return Panel(
         Group(Align.center(f"[bold]{title}[/bold]"),
@@ -277,7 +287,7 @@ def main():
                                 global repeat
                                 repeat = True
                                 while repeat:
-                                    run_player(file_path, 'r')
+                                    run_player(file_path, "r")
                                 clear_screen()
                                 Console().print(Align.center(rhythmsync_ascii))
                             elif par == "-d":
@@ -289,7 +299,7 @@ def main():
                                 audio_files.sort()
                                 repeat = True
                                 for file in audio_files:
-                                    run_player(file)
+                                    run_player(file, "d")
                                     if repeat == False:
                                         break
                                 clear_screen()
