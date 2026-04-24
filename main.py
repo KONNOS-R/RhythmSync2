@@ -11,6 +11,7 @@ from rich.layout import Layout
 from mutagen import File
 from re import match
 from pathlib import Path
+from random import shuffle
 import shlex
 
 
@@ -26,7 +27,8 @@ def make_layout():
 
 #header section
 def make_header(title, artist, mode = None):
-        if mode == "repeat":
+        mode = mode.split()
+        if mode[0] == "repeat":
             return Panel(
                 Group(
                     Align.center(f"[bold]{title}[/bold]"),
@@ -36,8 +38,19 @@ def make_header(title, artist, mode = None):
             title_align="right",
             style="white",
             )
-        elif mode[:9] == "directory":
-            now, total = mode.split()[1:]
+        elif mode[0][:9] == "directory":
+            now, total = mode[1:3]
+            if mode[0] == "directory-shuffle":
+                return Panel(
+                    Group(
+                        Align.center(f"[bold]{title}[/bold]"),
+                        Align.center(f"[#5900ab]{artist}[/#5900ab]")
+                        ),
+                title=f"🔀︎Playing {now} of {total}",
+                title_align="right",
+                style="white",
+                )
+
             return Panel(
                 Group(
                     Align.center(f"[bold]{title}[/bold]"),
@@ -258,6 +271,7 @@ def main():
         [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
             If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
             If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order.
+            If [cyan]{par}[/cyan] is "-ds" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in shuffle.
             If [cyan]{par}[/cyan] is omitted, the audio file plays once.
         [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
             If [cyan]{tags}[/cyan] is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.
@@ -292,7 +306,7 @@ def main():
                                 clear_screen()
                                 Console().print(Align.center(rhythmsync_ascii))
                             elif par == "-d":
-                                extensions = (".mp3", ".flac", ".wav", ".ogg", ".m4a")
+                                extensions = (".mp3", ".flac", ".wav", ".ogg")
                                 audio_files = [
                                 f for f in Path(file_path).iterdir()
                                 if f.suffix.lower() in extensions
@@ -303,6 +317,22 @@ def main():
                                 for file in audio_files:
                                     i += 1
                                     run_player(file, f"directory {i} {len(audio_files)}")
+                                    if repeat == False:
+                                        break
+                                clear_screen()
+                                Console().print(Align.center(rhythmsync_ascii))
+                            elif par == "-ds":
+                                extensions = (".mp3", ".flac", ".wav", ".ogg")
+                                audio_files = [
+                                f for f in Path(file_path).iterdir()
+                                if f.suffix.lower() in extensions
+                                ]
+                                shuffle(audio_files)
+                                repeat = True
+                                i = 0
+                                for file in audio_files:
+                                    i += 1
+                                    run_player(file, f"directory-shuffle {i} {len(audio_files)}")
                                     if repeat == False:
                                         break
                                 clear_screen()
