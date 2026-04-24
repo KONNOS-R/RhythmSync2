@@ -27,39 +27,40 @@ def make_layout():
 
 #header section
 def make_header(title, artist, mode = None):
-        mode = mode.split()
-        if mode[0] == "repeat":
-            return Panel(
-                Group(
-                    Align.center(f"[bold]{title}[/bold]"),
-                    Align.center(f"[#5900ab]{artist}[/#5900ab]")
-                    ),
-            title="⭮",
-            title_align="right",
-            style="white",
-            )
-        elif mode[0][:9] == "directory":
-            now, total = mode[1:3]
-            if mode[0] == "directory-shuffle":
+        if mode is not None:
+            mode = mode.split()
+            if mode[0] == "repeat":
                 return Panel(
                     Group(
                         Align.center(f"[bold]{title}[/bold]"),
                         Align.center(f"[#5900ab]{artist}[/#5900ab]")
                         ),
-                title=f"🔀︎Playing {now} of {total}",
+                title="⭮",
                 title_align="right",
                 style="white",
                 )
-
-            return Panel(
-                Group(
-                    Align.center(f"[bold]{title}[/bold]"),
-                    Align.center(f"[#5900ab]{artist}[/#5900ab]")
-                    ),
-            title=f"Playing {now} of {total}",
-            title_align="right",
-            style="white",
-            )
+            elif mode[0][:9] == "directory":
+                now, total = mode[1:3]
+                if mode[0] == "directory-shuffle":
+                    return Panel(
+                        Group(
+                            Align.center(f"[bold]{title}[/bold]"),
+                            Align.center(f"[#5900ab]{artist}[/#5900ab]")
+                            ),
+                    title=f"🔀︎Playing {now} of {total}",
+                    title_align="right",
+                    style="white",
+                    )
+    
+                return Panel(
+                    Group(
+                        Align.center(f"[bold]{title}[/bold]"),
+                        Align.center(f"[#5900ab]{artist}[/#5900ab]")
+                        ),
+                title=f"Playing {now} of {total}",
+                title_align="right",
+                style="white",
+                )
 
         return Panel(
         Group(Align.center(f"[bold]{title}[/bold]"),
@@ -69,11 +70,15 @@ def make_header(title, artist, mode = None):
 
 #lyrics section
 def make_lyrics(lyrics):
-    line1, line2, line3 = lyrics
+    line1, line2, line3, line4, line5, line6, line7 = lyrics
     return Align.center(Group(
-            Align.center(f"[bold white]{line1}[/bold white]"),
-            Align.center(f"[bold #00d0ff]{line2}[/bold #00d0ff]"),
-            Align.center(f"[bold white]{line3}[/bold white]")
+            Align.center(f"[#0f0f0f]{line1}[#0f0f0f]"),
+            Align.center(f"[#1f1f1f]{line2}[#1f1f1f]"),
+            Align.center(f"[#2f2f2f]{line3}[#2f2f2f]"),
+            Align.center(f"[bold #00d0ff]{line4}[/bold #00d0ff]"),
+            Align.center(f"[white]{line5}[white]"),
+            Align.center(f"[#afafaf]{line6}[#afafaf]"),
+            Align.center(f"[#7f7f7f]{line7}[#7f7f7f]")
             ),
         vertical="middle"
     )
@@ -228,7 +233,15 @@ def run_player(file_path, mode = None):
 
                 if lyrics_exist and lyric_index < len(lyrics):
                     if unformat_time(lyrics[lyric_index][0]) <= current_time:
-                        layout["lyrics"].update(make_lyrics((lyrics[lyric_index-1][1] if lyric_index > 0 else "", lyrics[lyric_index][1], lyrics[lyric_index+1][1] if lyric_index < len(lyrics)-1 else "")))
+                        layout["lyrics"].update(make_lyrics((
+                            lyrics[lyric_index-3][1] if lyric_index > 2 else "",
+                            lyrics[lyric_index-2][1] if lyric_index > 1 else "",
+                            lyrics[lyric_index-1][1] if lyric_index > 0 else "",
+                            lyrics[lyric_index][1],
+                            lyrics[lyric_index+1][1] if lyric_index < len(lyrics)-1 else "",
+                            lyrics[lyric_index+2][1] if lyric_index < len(lyrics)-2 else "",
+                            lyrics[lyric_index+3][1] if lyric_index < len(lyrics)-3 else ""
+                            )))
                         lyric_index += 1
 
                 progress.update(playback, 
@@ -357,10 +370,6 @@ def main():
                 #invalid command
                 else:
                     print("Invalid command! Enter 'help' to display command list.")
-                    
-                #file_path = str(Path(input("Path to audio file: ")).expanduser().resolve())
-                #run_player(file_path)
-                #clear_screen()
     
         except KeyboardInterrupt:
             print(f"Exitting...")
