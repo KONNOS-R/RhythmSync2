@@ -26,7 +26,7 @@ def make_layout():
 
 #header section
 def make_header(title, artist, mode = None):
-        if mode == "r":
+        if mode == "repeat":
             return Panel(
                 Group(
                     Align.center(f"[bold]{title}[/bold]"),
@@ -36,13 +36,14 @@ def make_header(title, artist, mode = None):
             title_align="right",
             style="white",
             )
-        elif mode == "d":
+        elif mode[:9] == "directory":
+            now, total = mode.split()[1:]
             return Panel(
                 Group(
                     Align.center(f"[bold]{title}[/bold]"),
                     Align.center(f"[#5900ab]{artist}[/#5900ab]")
                     ),
-            title="➜",
+            title=f"Playing {now} of {total}",
             title_align="right",
             style="white",
             )
@@ -287,7 +288,7 @@ def main():
                                 global repeat
                                 repeat = True
                                 while repeat:
-                                    run_player(file_path, "r")
+                                    run_player(file_path, "repeat")
                                 clear_screen()
                                 Console().print(Align.center(rhythmsync_ascii))
                             elif par == "-d":
@@ -298,8 +299,10 @@ def main():
                                 ]
                                 audio_files.sort()
                                 repeat = True
+                                i = 0
                                 for file in audio_files:
-                                    run_player(file, "d")
+                                    i += 1
+                                    run_player(file, f"directory {i} {len(audio_files)}")
                                     if repeat == False:
                                         break
                                 clear_screen()
