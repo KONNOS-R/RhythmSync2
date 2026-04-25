@@ -70,15 +70,13 @@ def make_header(title, artist, mode = None):
 
 #lyrics section
 def make_lyrics(lyrics):
-    line1, line2, line3, line4, line5, line6, line7 = lyrics
+    line1, line2, line3, line4, line5 = lyrics
     return Align.center(Group(
-            Align.center(f"[#0f0f0f]{line1}[#0f0f0f]"),
-            Align.center(f"[#1f1f1f]{line2}[#1f1f1f]"),
-            Align.center(f"[#2f2f2f]{line3}[#2f2f2f]"),
-            Align.center(f"[bold #00d0ff]{line4}[/bold #00d0ff]"),
-            Align.center(f"[white]{line5}[white]"),
-            Align.center(f"[#afafaf]{line6}[#afafaf]"),
-            Align.center(f"[#7f7f7f]{line7}[#7f7f7f]")
+            Align.center(f"[#1f1f1f]{line1}[#1f1f1f]"),
+            Align.center(f"[#2f2f2f]{line2}[#2f2f2f]"),
+            Align.center(f"[bold #00d0ff]{line3}[/bold #00d0ff]"),
+            Align.center(f"[white]{line4}[white]"),
+            Align.center(f"[#afafaf]{line5}[#afafaf]")
             ),
         vertical="middle"
     )
@@ -234,13 +232,11 @@ def run_player(file_path, mode = None):
                 if lyrics_exist and lyric_index < len(lyrics):
                     if unformat_time(lyrics[lyric_index][0]) <= current_time:
                         layout["lyrics"].update(make_lyrics((
-                            lyrics[lyric_index-3][1] if lyric_index > 2 else "",
                             lyrics[lyric_index-2][1] if lyric_index > 1 else "",
                             lyrics[lyric_index-1][1] if lyric_index > 0 else "",
                             lyrics[lyric_index][1],
                             lyrics[lyric_index+1][1] if lyric_index < len(lyrics)-1 else "",
-                            lyrics[lyric_index+2][1] if lyric_index < len(lyrics)-2 else "",
-                            lyrics[lyric_index+3][1] if lyric_index < len(lyrics)-3 else ""
+                            lyrics[lyric_index+2][1] if lyric_index < len(lyrics)-2 else ""
                             )))
                         lyric_index += 1
 

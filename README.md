@@ -1,7 +1,6 @@
 RhythmSync
 CLI audio player that plays music while displaying synchronized lyrics (LRC).
 
-
 command list:
 help - Lists all available commands.
 clear - Clears the terminal.
