@@ -5,8 +5,9 @@ command list:
 help - Lists all available commands.
 clear - Clears the terminal.
 play {par} {path} - Plays the audio file located at the specified {path}.
-    If {par} is "-r", the audio file plays in repeat until stopped.
+    If {par} is "-r", the audio file plays in a loop until stopped.
     If {par} is "-d" and {path} is a directory, the audio files of given directory play in alphabetic order.
+    If {par} is "-dr" and {path} is a directory, the audio files of given directory play in alphabetic order and loop around until stopped.
     If {par} is "-ds" and {path} is a directory, the audio files of given directory play in shuffle.
     If {par} is omitted, the audio file plays once.
 info {path} {tags} - Displays metadata for the file at {path}.

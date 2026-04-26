@@ -51,6 +51,16 @@ def make_header(title, artist, mode = None):
                     title_align="right",
                     style="white",
                     )
+                elif mode[0] == "directory-repeat":
+                    return Panel(
+                        Group(
+                            Align.center(f"[bold]{title}[/bold]"),
+                            Align.center(f"[#5900ab]{artist}[/#5900ab]")
+                            ),
+                    title=f"⭮ Playing {now} of {total}",
+                    title_align="right",
+                    style="white",
+                    )
     
                 return Panel(
                     Group(
@@ -61,7 +71,7 @@ def make_header(title, artist, mode = None):
                 title_align="right",
                 style="white",
                 )
-
+            
         return Panel(
         Group(Align.center(f"[bold]{title}[/bold]"),
               Align.center(f"[#5900ab]{artist}[/#5900ab]")),
@@ -280,6 +290,7 @@ def main():
         [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
             If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
             If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order.
+            If [cyan]{par}[/cyan] is "-dr" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order and loop around until stopped.
             If [cyan]{par}[/cyan] is "-ds" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in shuffle.
             If [cyan]{par}[/cyan] is omitted, the audio file plays once.
         [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
@@ -344,6 +355,23 @@ def main():
                                     run_player(file, f"directory-shuffle {i} {len(audio_files)}")
                                     if repeat == False:
                                         break
+                                clear_screen()
+                                Console().print(Align.center(rhythmsync_ascii))
+                            elif par == "-dr":
+                                extensions = (".mp3", ".flac", ".wav", ".ogg")
+                                audio_files = [
+                                f for f in Path(file_path).iterdir()
+                                if f.suffix.lower() in extensions
+                                ]
+                                audio_files.sort()
+                                repeat = True
+                                while repeat:
+                                    i = 0
+                                    for file in audio_files:
+                                        i += 1
+                                        run_player(file, f"directory-repeat {i} {len(audio_files)}")
+                                        if repeat == False:
+                                            break
                                 clear_screen()
                                 Console().print(Align.center(rhythmsync_ascii))
                         else:
