@@ -177,7 +177,7 @@ def get_lrc(file_path):
             print(f"Error: Could not open file {file_path}")
             return None
 
-        lrc_tag_names = ['LYRICS', 'UNSYNCEDLYRICS', 'LRC', 'USLT::eng']
+        lrc_tag_names = ['USLT', 'SYLT', 'USLT::eng', 'USLT::XXX', 'SYLT::eng', 'LYRICS', 'LYRICS:eng', 'LYRICS:XXX', 'LYRICS-ENG', 'LYRICS-XXX', 'LYRICS_EN', 'LYRICS_UNSYNCED', 'LYRICS_SYNCED', 'UNSYNCEDLYRICS', 'SYNCEDLYRICS', '©lyr']
 
         for tag_name in lrc_tag_names:
             if tag_name in audio:
@@ -289,9 +289,9 @@ def main():
         [green]clear[/green] - Clears the terminal.
         [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
             If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
-            If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order.
-            If [cyan]{par}[/cyan] is "-dr" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetic order and loop around until stopped.
-            If [cyan]{par}[/cyan] is "-ds" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in shuffle.
+            If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetical order.
+            If [cyan]{par}[/cyan] is "-dr" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetical order and loop around until stopped.
+            If [cyan]{par}[/cyan] is "-ds" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in shuffled order.
             If [cyan]{par}[/cyan] is omitted, the audio file plays once.
         [green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
             If [cyan]{tags}[/cyan] is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.
