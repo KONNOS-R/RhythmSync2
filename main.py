@@ -2,6 +2,7 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
 from rich.console import Console
+console = Console()
 from rich.console import Group
 from rich.panel import Panel
 from rich.align import Align
@@ -263,6 +264,7 @@ def run_player(file_path, mode = None):
         
 #main program
 def main():
+    clear_screen()
     rhythmsync_ascii ='''[#5900ab]
 [#5900ab] _____  _           _   _                [#00d0ff]_____                  
 [#5900ab]|  __ \\| |         | | | |              [#00d0ff]/ ____|                 
@@ -273,9 +275,11 @@ def main():
 [#5900ab]               __/ |                         [#00d0ff]   __/ |           
 [#5900ab]              |___/                           [#00d0ff] |___/            
 '''
-    Console().print(Align.center(rhythmsync_ascii))
+    console.print(Align.center(rhythmsync_ascii))
     while True:
         try:
+            global repeat
+
             raw_command = input(">")
             
             if raw_command.strip():
@@ -284,7 +288,7 @@ def main():
             
                 #help command
                 if command[0] == "help" and command_parts == 1:
-                    Console().print('''command list:
+                    console.print('''command list:
         [green]help[/green] - Lists all available commands.
         [green]clear[/green] - Clears the terminal.
         [green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
@@ -302,7 +306,7 @@ def main():
                 #clear command
                 elif command[0] == "clear" and command_parts == 1:
                     clear_screen()
-                    Console().print(Align.center(rhythmsync_ascii))
+                    console.print(Align.center(rhythmsync_ascii))
                 
                 #play command
                 elif command[0] == "play":
@@ -311,7 +315,7 @@ def main():
                         if os.path.exists(file_path):
                             run_player(file_path)
                             clear_screen()
-                            Console().print(Align.center(rhythmsync_ascii))
+                            console.print(Align.center(rhythmsync_ascii))
                         else:
                             print("Please enter a valid file path.")
                     elif command_parts == 3:
@@ -319,12 +323,11 @@ def main():
                         file_path = str(Path(command[2]).expanduser().resolve())
                         if os.path.exists(file_path):
                             if par == "-r":
-                                global repeat
                                 repeat = True
                                 while repeat:
                                     run_player(file_path, "repeat")
                                 clear_screen()
-                                Console().print(Align.center(rhythmsync_ascii))
+                                console.print(Align.center(rhythmsync_ascii))
                             elif par == "-d":
                                 extensions = (".mp3", ".flac", ".wav", ".ogg")
                                 audio_files = [
@@ -340,7 +343,7 @@ def main():
                                     if repeat == False:
                                         break
                                 clear_screen()
-                                Console().print(Align.center(rhythmsync_ascii))
+                                console.print(Align.center(rhythmsync_ascii))
                             elif par == "-ds":
                                 extensions = (".mp3", ".flac", ".wav", ".ogg")
                                 audio_files = [
@@ -356,7 +359,7 @@ def main():
                                     if repeat == False:
                                         break
                                 clear_screen()
-                                Console().print(Align.center(rhythmsync_ascii))
+                                console.print(Align.center(rhythmsync_ascii))
                             elif par == "-dr":
                                 extensions = (".mp3", ".flac", ".wav", ".ogg")
                                 audio_files = [
@@ -373,7 +376,7 @@ def main():
                                         if repeat == False:
                                             break
                                 clear_screen()
-                                Console().print(Align.center(rhythmsync_ascii))
+                                console.print(Align.center(rhythmsync_ascii))
                         else:
                             print("Please enter a valid file path.") 
                     else:
@@ -385,7 +388,7 @@ def main():
                        file_path = Path(command[1]).expanduser().resolve()
                        par = tuple(command[2:]) or None
                        if os.path.exists(file_path):
-                           Console().print(get_metadata(file_path, par), highlight=False)
+                           console.print(get_metadata(file_path, par), highlight=False)
                        else:
                            print("Please enter a valid file path.")
                     else:
@@ -398,12 +401,11 @@ def main():
         except KeyboardInterrupt:
             print(f"Exitting...")
             break
-        except BaseException as e:
+        except Exception as e:
             clear_screen()
-            Console().print(Align.center(rhythmsync_ascii))
+            console.print(Align.center(rhythmsync_ascii))
             print(f"Error: {e}")
     
 
 if __name__ == "__main__":
-    clear_screen()
     main()

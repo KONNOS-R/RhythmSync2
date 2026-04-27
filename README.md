@@ -19,6 +19,20 @@ CLI audio player that plays music while displaying synchronized lyrics (LRC).
 
 ---
 
+## Installation and Usage
+
+- Install the CLI application
+```
+pip install rhythmsync
+```
+
+- Launch the CLI application:
+```
+rhythmsync
+```
+
+---
+
 ## Supported Audio Formats
 
 - `.mp3`
