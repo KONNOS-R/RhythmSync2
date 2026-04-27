@@ -177,7 +177,7 @@ def get_lrc(file_path):
             print(f"Error: Could not open file {file_path}")
             return None
 
-        lrc_tag_names = ['USLT', 'SYLT', 'USLT::eng', 'USLT::XXX', 'SYLT::eng', 'LYRICS', 'LYRICS:eng', 'LYRICS:XXX', 'LYRICS-ENG', 'LYRICS-XXX', 'LYRICS_EN', 'LYRICS_UNSYNCED', 'LYRICS_SYNCED', 'UNSYNCEDLYRICS', 'SYNCEDLYRICS', '©lyr']
+        lrc_tag_names = ['SYLT', 'SYLT::eng', 'LYRICS', 'LYRICS:eng', 'LYRICS-ENG', 'LYRICS_EN', 'LYRICS_SYNCED', 'SYNCEDLYRICS']
 
         for tag_name in lrc_tag_names:
             if tag_name in audio:
