@@ -14,11 +14,124 @@ from re import match
 from pathlib import Path
 from random import shuffle
 import shlex
-
 import sys
 import termios
 import tty
 import select
+
+
+
+
+
+#cli input
+def getch():
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+    return ch
+
+
+def complete_path(text):
+    if not text:
+        return text
+    
+    text_last = text.split()[-1]
+
+    text_has_quotes = False
+    if '"' in text_last:
+        text_last = text.split()[-1].strip('"')
+        text_has_quotes = True
+
+    
+
+    path = os.path.expanduser(text_last)
+    dir_name = os.path.dirname(path) or "."
+    prefix = os.path.basename(path)
+
+    try:
+        options = os.listdir(dir_name)
+    except FileNotFoundError:
+        return text
+    
+    matches = []
+    for o in options:
+        if o.startswith(prefix):
+            full = os.path.join(dir_name, o)
+            matches.append(o)
+
+    if len(matches) == 1:
+        final_path = os.path.join(dir_name, matches[0])
+        if " " in final_path or text_has_quotes:
+            return " ".join(text.split()[0:-1]) + ' "' + final_path
+        else:
+            return " ".join(text.split()[0:-1]) + " " + final_path
+    return text
+
+
+def input_cli(prompt="> "):
+    global history_index
+
+    sys.stdout.write(prompt)
+    sys.stdout.flush()
+
+    buffer = ""
+    history_index = len(history)
+
+    while True:
+        ch = getch()
+
+        # ENTER
+        if ch == "\r" or ch == "\n":
+            print()
+            if buffer.strip():
+                history.append(buffer)
+            return buffer
+
+        # BACKSPACE
+        elif ch == "\x7f":
+            buffer = buffer[:-1]
+            sys.stdout.write("\r" + prompt + buffer + " ")
+            sys.stdout.write("\r" + prompt + buffer)
+            sys.stdout.flush()
+
+        # TAB
+        elif ch == "\t":
+            buffer = complete_path(buffer)
+            sys.stdout.write("\r" + prompt + buffer)
+            sys.stdout.flush()
+
+        # ESC sequences
+        elif ch == "\x1b":
+            next1 = getch()
+            next2 = getch()
+
+            # UP arrow
+            if next2 == "A":
+                if history:
+                    history_index = max(0, history_index - 1)
+                    buffer = history[history_index]
+                    sys.stdout.write("\r" + prompt + buffer + " " * 10)
+                    sys.stdout.write("\r" + prompt + buffer)
+                    sys.stdout.flush()
+
+            # DOWN arrow
+            elif next2 == "B":
+                if history:
+                    history_index = min(len(history) - 1, history_index + 1)
+                    buffer = history[history_index]
+                    sys.stdout.write("\r" + prompt + buffer + " " * 10)
+                    sys.stdout.write("\r" + prompt + buffer)
+                    sys.stdout.flush()
+
+        else:
+            buffer += ch
+            sys.stdout.write(ch)
+            sys.stdout.flush()
+#/cliinput
 
 
 #create rich layout
@@ -305,7 +418,13 @@ def run_player(file_path, mode=None):
 #main program
 def main():
     clear_screen()
-    rhythmsync_ascii ='''[#5900ab]
+
+    global history
+    global history_index
+    history = []
+    history_index = -1
+
+    rhythmsync_ascii ='''[bold][#5900ab]
 [#5900ab] _____  _           _   _                [#00d0ff]_____                  
 [#5900ab]|  __ \\| |         | | | |              [#00d0ff]/ ____|                 
 [#5900ab]| |__) | |__  _   _| |_| |__  _ __ ___ [#00d0ff]| (___  _   _ _ __   ___ 
@@ -320,7 +439,7 @@ def main():
         try:
             global repeat
 
-            raw_command = input(">")
+            raw_command = input_cli("> ")
             
             if raw_command.strip():
                 command = shlex.split(raw_command)
@@ -347,6 +466,16 @@ def main():
                 elif command[0] == "clear" and command_parts == 1:
                     clear_screen()
                     console.print(Align.center(rhythmsync_ascii))
+
+                elif command[0] == "ls" and command_parts == 1:
+                    print(os.listdir())
+
+                elif command[0] == "cd" and command_parts == 2:
+                    directory = str(Path(command[1]).expanduser().resolve())
+                    if os.path.exists(directory):
+                        os.chdir(directory)
+                    else:
+                        print("Please enter a valid file path.")
                 
                 #play command
                 elif command[0] == "play":
