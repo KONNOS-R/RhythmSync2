@@ -18,6 +18,7 @@ import sys
 import termios
 import tty
 import select
+import signal
 
 
 
@@ -38,39 +39,69 @@ def getch():
 def complete_path(text):
     if not text:
         return text
-    
-    text_last = text.split()[-1]
 
-    text_has_quotes = False
-    if '"' in text_last:
-        text_last = text.split()[-1].strip('"')
-        text_has_quotes = True
+    def complete_fragment(fragment):
+        fragment = fragment.strip()
 
-    
+        # Remove surrounding quotes
+        if (fragment.startswith('"') and fragment.endswith('"')) or (
+            fragment.startswith("'") and fragment.endswith("'")
+        ):
+            fragment = fragment[1:-1]
 
-    path = os.path.expanduser(text_last)
-    dir_name = os.path.dirname(path) or "."
-    prefix = os.path.basename(path)
+        fragment = os.path.expanduser(fragment)
 
-    try:
-        options = os.listdir(dir_name)
-    except FileNotFoundError:
-        return text
-    
-    matches = []
-    for o in options:
-        if o.startswith(prefix):
-            full = os.path.join(dir_name, o)
-            matches.append(o)
+        dir_name, prefix = os.path.split(fragment)
+        if dir_name in ("", "."):
+            dir_name = "."
 
-    if len(matches) == 1:
-        final_path = os.path.join(dir_name, matches[0])
-        if " " in final_path or text_has_quotes:
-            return " ".join(text.split()[0:-1]) + ' "' + final_path
+        try:
+            entries = list(os.scandir(dir_name))
+        except OSError:
+            return None
+
+        exact = [e for e in entries if e.name == prefix]
+        if len(exact) == 1:
+            chosen = exact[0]
         else:
-            return " ".join(text.split()[0:-1]) + " " + final_path
-    return text
+            matches = [e for e in entries if e.name.startswith(prefix)]
+            if len(matches) != 1:
+                return None
+            chosen = matches[0]
 
+        completed = os.path.join(dir_name, chosen.name)
+
+        if chosen.is_dir():
+            completed += os.sep
+
+        return completed
+
+    quote_hits = [
+        (text.rfind(q), q)
+        for q in ('"', "'")
+        if text.count(q) % 2 == 1 and text.rfind(q) != -1
+    ]
+
+    if quote_hits:
+        start, quote_char = max(quote_hits)
+        fragment = text[start + 1:]
+        completed = complete_fragment(fragment)
+        if completed:
+            return text[:start + 1] + completed + quote_char
+        return text
+
+    parts = text.split()
+    for k in range(len(parts), 0, -1):
+        base = " ".join(parts[:-k])
+        fragment = " ".join(parts[-k:])
+
+        completed = complete_fragment(fragment)
+        if completed:
+            if " " in completed:
+                completed = f'"{completed}"'
+            return (base + " " if base else "") + completed
+
+    return text
 
 def input_cli(prompt="> "):
     global history_index
@@ -84,8 +115,20 @@ def input_cli(prompt="> "):
     while True:
         ch = getch()
 
+         # CTRL+C
+        if ch == "\x03":
+            print()
+            raise KeyboardInterrupt
+
+        # CTRL+Z
+        elif ch == "\x1a":
+            print("\n[Suspended]")
+            # restore terminal before suspending
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, termios.tcgetattr(sys.stdin))
+            os.kill(os.getpid(), signal.SIGTSTP)
+
         # ENTER
-        if ch == "\r" or ch == "\n":
+        elif ch == "\r" or ch == "\n":
             print()
             if buffer.strip():
                 history.append(buffer)
