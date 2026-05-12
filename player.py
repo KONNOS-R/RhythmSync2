@@ -16,6 +16,7 @@ import termios
 import tty
 import select
 
+
 #create rich layout
 def make_layout():
     layout = Layout()

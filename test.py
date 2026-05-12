@@ -9,7 +9,6 @@ import player
 import command_parser
 
 
-
 #cli input
 def getch():
     fd = sys.stdin.fileno()

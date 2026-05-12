@@ -8,6 +8,7 @@ import shlex
 
 import player
 
+
 def parse_command(raw_command):
     if raw_command.strip():
         command = shlex.split(raw_command)
@@ -15,36 +16,59 @@ def parse_command(raw_command):
     
         #help command
         if command[0] == "help" and command_parts == 1:
-            console.print('''command list:
-[green]help[/green] - Lists all available commands.
-[green]clear[/green] - Clears the terminal.
-[green]play[/green] [cyan]{par} {path}[/cyan] - Plays the audio file located at the specified [cyan]{path}[/cyan].
-    If [cyan]{par}[/cyan] is "-r", the audio file plays in repeat until stopped.
-    If [cyan]{par}[/cyan] is "-d" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetical order.
-    If [cyan]{par}[/cyan] is "-dr" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in alphabetical order and loop around until stopped.
-    If [cyan]{par}[/cyan] is "-ds" and [cyan]{path}[/cyan] is a directory, the audio files of given directory play in shuffled order.
-    If [cyan]{par}[/cyan] is omitted, the audio file plays once.
-[green]info[/green] [cyan]{path} {tags}[/cyan] - Displays metadata for the file at [cyan]{path}[/cyan].
-    If [cyan]{tags}[/cyan] is provided (separate them with space for multiple tags), shows only those specific tags and their respective values.
-    If [cyan]{tags}[/cyan] is omitted, shows all available tags and their respective values.
+            console.print('''COMMAND LIST:
+[green]help[/green]  lists all available commands
+
+[green]ls[/green]  lists all files and directories in the current working directory
+[green]ls[/green] [cyan]{dir}[/cyan]  lists all files and directories in given direcrory
+                                          
+[green]cd[/green] [cyan]{dir}[/cyan]  changes current working directory to given directory
+
+[green]clear[/green]  clears the terminal
+
+[green]play[/green]  plays all songs in the current working directory                      
+[green]play[/green] [cyan]{path}[/cyan]  the given audio file plays once                                     
+[green]play[/green] [cyan]{option} {path}[/cyan]
+    [cyan]-r[/cyan]   the given audio file plays in repeat until stopped 
+[green]play[/green] [cyan]{option} {dir}[/cyan]
+    [cyan]-d[/cyan]   the audio files of given directory play in alphabetical order
+    [cyan]-dr[/cyan]  the audio files of given directory play in alphabetical order and loop around until stopped
+    [cyan]-ds[/cyan]  the audio files of given directory play in shuffled order
+   
+[green]info[/green] [cyan]{path}[/cyan]  shows all available tags and their respective values for the given audio file.
+[green]info[/green] [cyan]{path} {tags}[/cyan]  hows only the provided tags (separate tags with space for multiple ones) and their respective values
 '''
                             )
         
-        #clear command
-        elif command[0] == "clear" and command_parts == 1:
-            player.clear_screen()
-            player.logo()
-        elif command[0] == "ls" and command_parts == 1:
-            print(os.listdir())
+        #list command
+        elif command[0] == "ls":
+            if command_parts == 1:
+                console.print(f"[blue]{"   ".join(os.listdir())}", highlight=False)
+            elif command_parts == 2:
+                directory = str(Path(command[1]).expanduser().resolve())
+                if os.path.exists(directory):
+                    console.print(f"[blue]{"   ".join(os.listdir(directory))}", highlight=False)
+            else:
+                print("Please enter valid parameters.")
+
+        #change dir command
         elif command[0] == "cd" and command_parts == 2:
             directory = str(Path(command[1]).expanduser().resolve())
             if os.path.exists(directory):
                 os.chdir(directory)
             else:
                 print("Please enter a valid file path.")
+
+        #clear command
+        elif command[0] == "clear" and command_parts == 1:
+            player.clear_screen()
+            player.logo()
         
         #play command
         elif command[0] == "play":
+            if command_parts == 1:
+                command_parts = 3
+                command = ["play", "-d", "."]
             if command_parts == 2: #single
                 file_path = str(Path(command[1]).expanduser().resolve())
                 if os.path.exists(file_path):
