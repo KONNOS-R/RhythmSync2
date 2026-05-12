@@ -1,17 +1,13 @@
 import os
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-import pygame
 from rich.console import Console
 console = Console()
 from rich.align import Align
-from rich.live import Live
 from pathlib import Path
 from random import shuffle
 import shlex
 import sys
 import termios
 import tty
-import select
 import signal
 
 import player
@@ -168,104 +164,9 @@ def input_cli(prompt="> "):
             sys.stdout.write(ch)
             sys.stdout.flush()
 #/cliinput
-
-
-# music player
-def run_player(file_path, mode=None):
-    global repeat
-
-    fd = sys.stdin.fileno()
-    old = termios.tcgetattr(fd)
-
-    try:
-        tty.setcbreak(fd)
-
-        layout = player.make_layout()
-
-        pygame.mixer.init()
-        pygame.mixer.music.load(file_path)
-        pygame.mixer.music.play()
-
-        total_length = int(pygame.mixer.Sound(file_path).get_length() * 1000)
-
-        title, artist = player.get_ti_ar(file_path)
-
-        lyrics_exist = False
-        raw_lrc = player.get_lrc(file_path)
-        if raw_lrc is not None:
-            lyrics = player.format_lrc(raw_lrc)
-            lyrics_exist = True
-
-        player.clear_screen()
-
-        layout["header"].update(player.make_header(title, artist, mode))
-        layout["lyrics"].update(
-            Align.center("No lyrics to display", vertical="middle")
-        )
-        progress = player.make_player()
-        layout["player"].update(progress)
-
-        with Live(layout, refresh_per_second=100):
-            playback = progress.add_task(
-                f"[red]< [#00d0ff]",
-                total=total_length,
-                suffix="[#00d0ff] [red]>"
-            )
-
-            lyric_index = 0
-            paused = False
-
-            while pygame.mixer.music.get_busy() or paused:
-                current_time = pygame.mixer.music.get_pos()
-
-                # keyboard input
-                ready, _, _ = select.select([sys.stdin], [], [], 0)
-
-                if ready:
-                    key = sys.stdin.read(1)
-
-                    if key == " ":
-                        if paused:
-                            pygame.mixer.music.unpause()
-                            paused = False
-                        else:
-                            progress.update(
-                                playback,
-                                completed=current_time,
-                                description=f"[red]< [/red]▶ [#00d0ff]{player.format_time(current_time)}",
-                                suffix=f"[#00d0ff]{player.format_time(total_length - current_time)} [red]>"
-                            )
-                            pygame.mixer.music.pause()
-                            paused = True
-
-                if not paused:
-                    if lyrics_exist and lyric_index < len(lyrics):
-                        if player.unformat_time(lyrics[lyric_index][0]) <= current_time:
-                            layout["lyrics"].update(player.make_lyrics((
-                                lyrics[lyric_index - 2][1] if lyric_index > 1 else "",
-                                lyrics[lyric_index - 1][1] if lyric_index > 0 else "",
-                                lyrics[lyric_index][1],
-                                lyrics[lyric_index + 1][1] if lyric_index < len(lyrics) - 1 else "",
-                                lyrics[lyric_index + 2][1] if lyric_index < len(lyrics) - 2 else ""
-                            )))
-                            lyric_index += 1
-
-                    progress.update(
-                        playback,
-                        completed=current_time,
-                        description=f"[red]< [/red]⏸ [#00d0ff]{player.format_time(current_time)}",
-                        suffix=f"[#00d0ff]{player.format_time(total_length - current_time)} [red]>"
-                    )
-
-    except KeyboardInterrupt:
-        repeat = False
-        pygame.mixer.music.stop()
-
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        player.clear_screen()
-        print("Exitting...")
         
+
+
 #main program
 def main():
     player.clear_screen()
@@ -288,8 +189,6 @@ def main():
     console.print(Align.center(rhythmsync_ascii))
     while True:
         try:
-            global repeat
-
             raw_command = input_cli("> ")
             
             if raw_command.strip():
@@ -333,7 +232,7 @@ def main():
                     if command_parts == 2:
                         file_path = str(Path(command[1]).expanduser().resolve())
                         if os.path.exists(file_path):
-                            run_player(file_path)
+                            player.run_player(file_path)
                             player.clear_screen()
                             console.print(Align.center(rhythmsync_ascii))
                         else:
@@ -345,7 +244,7 @@ def main():
                             if par == "-r":
                                 repeat = True
                                 while repeat:
-                                    run_player(file_path, "repeat")
+                                    repeat = player.run_player(file_path, "repeat")
                                 player.clear_screen()
                                 console.print(Align.center(rhythmsync_ascii))
                             elif par == "-d":
@@ -359,8 +258,8 @@ def main():
                                 i = 0
                                 for file in audio_files:
                                     i += 1
-                                    run_player(file, f"directory {i} {len(audio_files)}")
-                                    if repeat == False:
+                                    repeat = player.run_player(file, f"directory {i} {len(audio_files)}")
+                                    if not repeat:
                                         break
                                 player.clear_screen()
                                 console.print(Align.center(rhythmsync_ascii))
@@ -375,8 +274,8 @@ def main():
                                 i = 0
                                 for file in audio_files:
                                     i += 1
-                                    run_player(file, f"directory-shuffle {i} {len(audio_files)}")
-                                    if repeat == False:
+                                    repeat = player.run_player(file, f"directory-shuffle {i} {len(audio_files)}")
+                                    if not repeat:
                                         break
                                 player.clear_screen()
                                 console.print(Align.center(rhythmsync_ascii))
@@ -392,7 +291,7 @@ def main():
                                     i = 0
                                     for file in audio_files:
                                         i += 1
-                                        run_player(file, f"directory-repeat {i} {len(audio_files)}")
+                                        repeat = player.run_player(file, f"directory-repeat {i} {len(audio_files)}")
                                         if repeat == False:
                                             break
                                 player.clear_screen()

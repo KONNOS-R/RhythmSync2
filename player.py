@@ -1,4 +1,7 @@
 import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+import pygame
+from rich.live import Live
 from rich.align import Align
 from rich.console import Group
 from rich.panel import Panel
@@ -6,6 +9,10 @@ from rich.progress import Progress, BarColumn, TextColumn
 from rich.layout import Layout
 from mutagen import File
 from re import match
+import sys
+import termios
+import tty
+import select
 
 #create rich layout
 def make_layout():
@@ -190,3 +197,98 @@ def format_lrc(lrc_data):
         if x[1] == "":
             x[1] = "♫"
     return lyrics
+
+# music player
+def run_player(file_path, mode=None):
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+
+    try:
+        tty.setcbreak(fd)
+
+        layout = make_layout()
+
+        pygame.mixer.init()
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+
+        total_length = int(pygame.mixer.Sound(file_path).get_length() * 1000)
+
+        title, artist = get_ti_ar(file_path)
+
+        lyrics_exist = False
+        raw_lrc = get_lrc(file_path)
+        if raw_lrc is not None:
+            lyrics = format_lrc(raw_lrc)
+            lyrics_exist = True
+
+        clear_screen()
+
+        layout["header"].update(make_header(title, artist, mode))
+        layout["lyrics"].update(
+            Align.center("No lyrics to display", vertical="middle")
+        )
+        progress = make_player()
+        layout["player"].update(progress)
+
+        with Live(layout, refresh_per_second=100):
+            playback = progress.add_task(
+                f"[red]< [#00d0ff]",
+                total=total_length,
+                suffix="[#00d0ff] [red]>"
+            )
+
+            lyric_index = 0
+            paused = False
+
+            while pygame.mixer.music.get_busy() or paused:
+                current_time = pygame.mixer.music.get_pos()
+
+                # keyboard input
+                ready, _, _ = select.select([sys.stdin], [], [], 0)
+
+                if ready:
+                    key = sys.stdin.read(1)
+
+                    if key == " ":
+                        if paused:
+                            pygame.mixer.music.unpause()
+                            paused = False
+                        else:
+                            progress.update(
+                                playback,
+                                completed=current_time,
+                                description=f"[red]< [/red]▶ [#00d0ff]{format_time(current_time)}",
+                                suffix=f"[#00d0ff]{format_time(total_length - current_time)} [red]>"
+                            )
+                            pygame.mixer.music.pause()
+                            paused = True
+
+                if not paused:
+                    if lyrics_exist and lyric_index < len(lyrics):
+                        if unformat_time(lyrics[lyric_index][0]) <= current_time:
+                            layout["lyrics"].update(make_lyrics((
+                                lyrics[lyric_index - 2][1] if lyric_index > 1 else "",
+                                lyrics[lyric_index - 1][1] if lyric_index > 0 else "",
+                                lyrics[lyric_index][1],
+                                lyrics[lyric_index + 1][1] if lyric_index < len(lyrics) - 1 else "",
+                                lyrics[lyric_index + 2][1] if lyric_index < len(lyrics) - 2 else ""
+                            )))
+                            lyric_index += 1
+
+                    progress.update(
+                        playback,
+                        completed=current_time,
+                        description=f"[red]< [/red]⏸ [#00d0ff]{format_time(current_time)}",
+                        suffix=f"[#00d0ff]{format_time(total_length - current_time)} [red]>"
+                    )
+            return True
+            
+    except KeyboardInterrupt:
+        pygame.mixer.music.stop()
+        return False
+    
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        clear_screen()
+        print("Exitting...")
