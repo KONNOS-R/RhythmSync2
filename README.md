@@ -99,28 +99,28 @@ Supported tags include:
 
 ### General
 
-`help` - Lists all available commands.
-`ls` - Lists all files and directories in the current working directory.
-`ls {path}` - Lists all files and directories in the specified directory.
-`cd {path}` - Changes the current working directory to the specified directory.
-`clear` - Clears the terminal.
+- `help` - Lists all available commands.
+- `ls` - Lists all files and directories in the current working directory.
+- `ls {path}` - Lists all files and directories in the specified directory.
+- `cd {path}` - Changes the current working directory to the specified directory.
+- `clear` - Clears the terminal.
 
 ### Playback
 
-`play {path}` - Plays a single audio file once.
-`play -r {path}` - Plays a single audio file in repeat mode until stopped (Ctrl+C).
-`play -d {directory}` - Plays all supported audio files in alphabetical order.
-`play -dr {directory}` - Plays all supported audio files in alphabetical order and loops until stopped (Ctrl+C).
-`play -ds {directory}` - Plays all supported audio files in shuffled order and loops until stopped (Ctrl+C).
+- `play {path}` - Plays a single audio file once.
+- `play -r {path}` - Plays a single audio file in repeat mode until stopped (Ctrl+C).
+- `play -d {directory}` - Plays all supported audio files in alphabetical order.
+- `play -dr {directory}` - Plays all supported audio files in alphabetical order and loops until stopped (Ctrl+C).
+- `play -ds {directory}` - Plays all supported audio files in shuffled order and loops until stopped (Ctrl+C).
 
 ### Metadata
 
-`info {path}` - Displays all available metadata.
-`info {path}` [tags] - Displays only given metadata tags.
+- `info {path}` - Displays all available metadata.
+- `info {path}` [tags] - Displays only given metadata tags.
 
 ### Converter
 
-`convert {input path} {output path}` - Converts an audio file to another format (FFmpeg required).
+- `convert {input path} {output path}` - Converts an audio file to another format (FFmpeg required).
 
 ---
 
