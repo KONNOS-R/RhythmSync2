@@ -28,9 +28,9 @@ def help_msg():
 [green]help[/green]  lists all available commands
 
 [green]ls[/green]  lists all files and directories in the current working directory
-[green]ls[/green] [cyan]{dir}[/cyan]  lists all files and directories in given directory
+[green]ls[/green] [cyan]{dir}[/cyan]  lists all files and directories in the specified directory
                                           
-[green]cd[/green] [cyan]{dir}[/cyan]  changes current working directory to given directory
+[green]cd[/green] [cyan]{dir}[/cyan]  changes the current working directory to the specified directory
 
 [green]clear[/green]  clears the terminal
                    
@@ -45,5 +45,5 @@ def help_msg():
 [green]info[/green] [cyan]{path}[/cyan]  shows all available tags and their respective values for the given audio file.
 [green]info[/green] [cyan]{path} {tags}[/cyan]  hows only the provided tags (separate tags with space for multiple ones) and their respective values
                   
-[green]convert[/green] [cyan]{input path} {output path}[/cyan] Converts audio file to another format (ffmpeg required)
+[green]convert[/green] [cyan]{input path} {output path}[/cyan] Converts an audio file to another format (FFmpeg required)
 ''')
