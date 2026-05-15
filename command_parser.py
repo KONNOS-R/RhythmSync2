@@ -20,15 +20,15 @@ def parse_command(raw_command):
 [green]help[/green]  lists all available commands
 
 [green]ls[/green]  lists all files and directories in the current working directory
-[green]ls[/green] [cyan]{dir}[/cyan]  lists all files and directories in given direcrory
+[green]ls[/green] [cyan]{dir}[/cyan]  lists all files and directories in given directory
                                           
 [green]cd[/green] [cyan]{dir}[/cyan]  changes current working directory to given directory
 
 [green]clear[/green]  clears the terminal
                    
-[green]play[/green] [cyan]{path}[/cyan]  the given audio file plays once                                     
+[green]play[/green] [cyan]{path}[/cyan]  the given audio file plays once
 [green]play[/green] [cyan]{option} {path}[/cyan]
-    [cyan]-r[/cyan]   the given audio file plays in repeat until stopped 
+    [cyan]-r[/cyan]   the given audio file plays in repeat until stopped
 [green]play[/green] [cyan]{option} {dir}[/cyan]
     [cyan]-d[/cyan]   the audio files of given directory play in alphabetical order
     [cyan]-dr[/cyan]  the audio files of given directory play in alphabetical order and loop around until stopped
@@ -101,8 +101,6 @@ def parse_command(raw_command):
                             player.clear_screen()
                             player.logo()
                         else:
-                            player.clear_screen()
-                            player.logo()
                             print("No audio files found.")
                     elif par == "-ds": #dir shuffle
                         extensions = (".mp3", ".flac", ".wav", ".ogg")
@@ -122,8 +120,6 @@ def parse_command(raw_command):
                             player.clear_screen()
                             player.logo()
                         else:
-                            player.clear_screen()
-                            player.logo()
                             print("No audio files found.")
 
                     elif par == "-dr": #dir repeat
@@ -145,8 +141,6 @@ def parse_command(raw_command):
                             player.clear_screen()
                             player.logo()
                         else:
-                            player.clear_screen()
-                            player.logo()
                             print("No audio files found.")
                 else:
                     print("Please enter a valid file path.") 

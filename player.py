@@ -141,7 +141,7 @@ def get_metadata(file_path, tags = None):
         audio = File(file_path)
 
         if audio is None:
-            print(f"Error: Could not open file {file_path}")
+            print(f"Player error: Could not open file {file_path}")
             return None
         
         lines = []
@@ -164,7 +164,7 @@ def get_metadata(file_path, tags = None):
         return "\n".join(lines)
     
     except Exception as e:
-        print(f"Error extracting metadata: {e}")
+        print(f"Player error: Error extracting metadata: {e}")
         return None
 
 #get title and artist info
@@ -181,7 +181,7 @@ def get_ti_ar(file_path):
         return title, artist
     
     except Exception as e:
-        print(f"Error extracting metadata: {e}")
+        print(f"Player error: Error extracting metadata: {e}")
         return "Unknown Title", "Unknown Artist"
 
 #get lrc data from the audio file
@@ -190,7 +190,7 @@ def get_lrc(file_path):
         audio = File(file_path)
 
         if audio is None:
-            print(f"Error: Could not open file {file_path}")
+            print(f"Player error: Could not open file {file_path}")
             return None
 
         lrc_tag_names = ['SYLT', 'SYLT::eng', 'LYRICS', 'LYRICS:eng', 'LYRICS-ENG', 'LYRICS_EN', 'LYRICS_SYNCED', 'SYNCEDLYRICS']
@@ -201,7 +201,7 @@ def get_lrc(file_path):
         return None
 
     except Exception as e:
-        print(f"Error extracting LRC data: {e}")
+        print(f"Player error: Error extracting LRC data: {e}")
         return None
 
 #get lyric lines without the tags from the lrc data
@@ -256,17 +256,18 @@ def run_player(file_path, mode=None):
             )
 
             lyric_index = 0
+            seek_offset = 0
             paused = False
 
             while pygame.mixer.music.get_busy() or paused:
-                current_time = pygame.mixer.music.get_pos()
+                current_time = pygame.mixer.music.get_pos() + seek_offset
 
                 # keyboard input
                 ready, _, _ = select.select([sys.stdin], [], [], 0)
 
                 if ready:
                     key = sys.stdin.read(1)
-
+                    #SPACE
                     if key == " ":
                         if paused:
                             pygame.mixer.music.unpause()
@@ -280,6 +281,16 @@ def run_player(file_path, mode=None):
                             )
                             pygame.mixer.music.pause()
                             paused = True
+                    #ESC seq
+                    #elif key == "\x1b":
+                    #        seq = sys.stdin.read(2)
+                    #        # LEFT arrow
+                    #        if seq == "[D":
+                    #            pygame.mixer.music.set_pos(current_time - 500)
+                    #        #RIGHT arrow
+                    #        elif seq == "[C":
+                    #            pygame.mixer.music.set_pos(current_time + 500)
+
 
                 if not paused:
                     if lyrics_exist and lyric_index < len(lyrics):
