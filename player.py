@@ -30,7 +30,6 @@ def make_layout():
 #header section
 def make_header(title, artist, mode = None):
         if mode is not None:
-            mode = mode.split()
             if mode[0] == "repeat":
                 return Panel(
                     Group(
@@ -220,6 +219,8 @@ def run_player(file_path, mode=None):
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
 
+    mode = mode.split()
+
     try:
         tty.setcbreak(fd)
 
@@ -256,11 +257,10 @@ def run_player(file_path, mode=None):
             )
 
             lyric_index = 0
-            seek_offset = 0
             paused = False
 
             while pygame.mixer.music.get_busy() or paused:
-                current_time = pygame.mixer.music.get_pos() + seek_offset
+                current_time = pygame.mixer.music.get_pos()
 
                 # keyboard input
                 ready, _, _ = select.select([sys.stdin], [], [], 0)
@@ -282,14 +282,31 @@ def run_player(file_path, mode=None):
                             pygame.mixer.music.pause()
                             paused = True
                     #ESC seq
-                    #elif key == "\x1b":
-                    #        seq = sys.stdin.read(2)
-                    #        # LEFT arrow
-                    #        if seq == "[D":
-                    #            pygame.mixer.music.set_pos(current_time - 500)
-                    #        #RIGHT arrow
-                    #        elif seq == "[C":
-                    #            pygame.mixer.music.set_pos(current_time + 500)
+                    elif key == "\x1b":
+                            seq = sys.stdin.read(2)
+                            # LEFT arrow
+                            if seq == "[D":
+                                if mode[0] == "single":
+                                    pygame.mixer.music.stop()
+                                    return (True, 0)
+                                elif mode[0] == "repeat":
+                                    pygame.mixer.music.stop()
+                                    return (True, 0)
+                                elif mode[0][:9] == "directory":
+                                    pygame.mixer.music.stop()
+                                    return (True, int(mode[1])-1)
+                                
+                            #RIGHT arrow
+                            elif seq == "[C":
+                                if mode[0] == "single":
+                                    pygame.mixer.music.stop()
+                                    return (False, 0)
+                                elif mode[0] == "repeat":
+                                    pygame.mixer.music.stop()
+                                    return (True, 0)
+                                elif mode[0][:9] == "directory":
+                                    pygame.mixer.music.stop()
+                                    return (True, int(mode[1])+1)
 
 
                 if not paused:
@@ -310,11 +327,17 @@ def run_player(file_path, mode=None):
                         description=f"[red]< [/red]⏸ [#00d0ff]{format_time(current_time)}",
                         suffix=f"[#00d0ff]{format_time(total_length - current_time)} [red]>"
                     )
-            return True
+
+            if mode[0] == "single":
+                return (False, 0)
+            if mode[0] == "repeat":
+                return (True, 0)
+            elif mode[0][:9] == "directory":
+                return (True, int(mode[1])+1)
             
     except KeyboardInterrupt:
         pygame.mixer.music.stop()
-        return False
+        return (False, 0)
     
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)

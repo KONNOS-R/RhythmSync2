@@ -32,7 +32,7 @@ def parse_command(raw_command):
 [green]play[/green] [cyan]{option} {dir}[/cyan]
     [cyan]-d[/cyan]   the audio files of given directory play in alphabetical order
     [cyan]-dr[/cyan]  the audio files of given directory play in alphabetical order and loop around until stopped
-    [cyan]-ds[/cyan]  the audio files of given directory play in shuffled order
+    [cyan]-ds[/cyan]  the audio files of given directory play in shuffled order and loop around until stopped
    
 [green]info[/green] [cyan]{path}[/cyan]  shows all available tags and their respective values for the given audio file.
 [green]info[/green] [cyan]{path} {tags}[/cyan]  hows only the provided tags (separate tags with space for multiple ones) and their respective values
@@ -68,11 +68,14 @@ def parse_command(raw_command):
             if command_parts == 2: #single
                 file_path = str(Path(command[1]).expanduser().resolve())
                 if os.path.exists(file_path):
-                    player.run_player(file_path)
+                    repeat = True
+                    while repeat:
+                        repeat = player.run_player(file_path, "single")[0]
                     player.clear_screen()
                     player.logo()
                 else:
                     print("Please enter a valid file path.")
+
             elif command_parts == 3:
                 par = command[1]
                 file_path = str(Path(command[2]).expanduser().resolve())
@@ -80,68 +83,70 @@ def parse_command(raw_command):
                     if par == "-r": #single repeat
                         repeat = True
                         while repeat:
-                            repeat = player.run_player(file_path, "repeat")
+                            repeat = player.run_player(file_path, "repeat")[0]
                         player.clear_screen()
                         player.logo()
-                    elif par == "-d": #dir
-                        extensions = (".mp3", ".flac", ".wav", ".ogg")
-                        audio_files = [
-                        f for f in Path(file_path).iterdir()
-                        if f.suffix.lower() in extensions
-                        ]
-                        if audio_files:
-                            audio_files.sort()
-                            repeat = True
-                            i = 0
-                            for file in audio_files:
-                                i += 1
-                                repeat = player.run_player(file, f"directory {i} {len(audio_files)}")
-                                if not repeat:
-                                    break
-                            player.clear_screen()
-                            player.logo()
-                        else:
-                            print("No audio files found.")
-                    elif par == "-ds": #dir shuffle
-                        extensions = (".mp3", ".flac", ".wav", ".ogg")
-                        audio_files = [
-                        f for f in Path(file_path).iterdir()
-                        if f.suffix.lower() in extensions
-                        ]
-                        if audio_files:
-                            shuffle(audio_files)
-                            repeat = True
-                            i = 0
-                            for file in audio_files:
-                                i += 1
-                                repeat = player.run_player(file, f"directory-shuffle {i} {len(audio_files)}")
-                                if not repeat:
-                                    break
-                            player.clear_screen()
-                            player.logo()
-                        else:
-                            print("No audio files found.")
 
-                    elif par == "-dr": #dir repeat
+
+
+                    elif par[:2] == "-d": #directory modes
                         extensions = (".mp3", ".flac", ".wav", ".ogg")
                         audio_files = [
                         f for f in Path(file_path).iterdir()
                         if f.suffix.lower() in extensions
                         ]
-                        if audio_files:
-                            audio_files.sort()
-                            repeat = True
-                            while repeat:
-                                i = 0
-                                for file in audio_files:
-                                    i += 1
-                                    repeat = player.run_player(file, f"directory-repeat {i} {len(audio_files)}")
-                                    if repeat == False:
+
+                        if par == "-d": #dir
+                            if audio_files:
+                                audio_files.sort()
+                                repeat = True
+                                i = 1
+                                while i-1 < len(audio_files) and i >= 1 and repeat:
+                                    for j in range(i-1, len(audio_files)):
+                                        repeat, i = player.run_player(audio_files[j], f"directory {i} {len(audio_files)}")
+                                        if i < 1:
+                                            i = 1
                                         break
-                            player.clear_screen()
-                            player.logo()
-                        else:
-                            print("No audio files found.")
+                                player.clear_screen()
+                                player.logo()
+                            else:
+                                print("No audio files found.")
+
+                        elif par == "-dr": #dir repeat
+                            if audio_files:
+                                audio_files.sort()
+                                repeat = True
+                                i = 1
+                                while repeat:
+                                    for j in range(i-1, len(audio_files)):
+                                        repeat, i = player.run_player(audio_files[j], f"directory {i} {len(audio_files)}")
+                                        if i < 1:
+                                            i = len(audio_files)
+                                        elif i > len(audio_files):
+                                            i = 1
+                                        break
+                                player.clear_screen()
+                                player.logo()
+                            else:
+                                print("No audio files found.")
+
+                        elif par == "-ds": #dir shuffle
+                            if audio_files:
+                                shuffle(audio_files)
+                                repeat = True
+                                i = 1
+                                while repeat:
+                                    for j in range(i-1, len(audio_files)):
+                                        repeat, i = player.run_player(audio_files[j], f"directory {i} {len(audio_files)}")
+                                        if i < 1:
+                                            i = len(audio_files)
+                                        elif i > len(audio_files):
+                                            i = 1
+                                        break
+                                player.clear_screen()
+                                player.logo()
+                            else:
+                                print("No audio files found.")
                 else:
                     print("Please enter a valid file path.") 
             else:
