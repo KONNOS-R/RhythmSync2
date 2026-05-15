@@ -6,6 +6,7 @@ import tty
 import signal
 
 import player
+import terminal_disp
 import command_parser
 
 
@@ -161,17 +162,16 @@ def input_cli(prompt="> "):
 #/cliinput
         
 
-
 #main program
 def main():
-    player.clear_screen()
+    terminal_disp.clear_screen()
 
     global history
     global history_index
     history = []
     history_index = -1
 
-    player.logo()
+    terminal_disp.logo()
     while True:
         try:
             command_parser.parse_command(input_cli("> "))
@@ -181,8 +181,8 @@ def main():
             break
 
         except Exception as e:
-            player.clear_screen()
-            player.logo()
+            terminal_disp.clear_screen()
+            terminal_disp.logo()
             print(f"Error: {e}")
     
 

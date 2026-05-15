@@ -7,6 +7,9 @@ from random import shuffle
 import shlex
 
 import player
+import metadata
+import converter
+import terminal_disp
 
 
 def parse_command(raw_command):
@@ -16,28 +19,7 @@ def parse_command(raw_command):
     
         #help command
         if command[0] == "help" and command_parts == 1:
-            console.print('''COMMAND LIST:
-[green]help[/green]  lists all available commands
-
-[green]ls[/green]  lists all files and directories in the current working directory
-[green]ls[/green] [cyan]{dir}[/cyan]  lists all files and directories in given directory
-                                          
-[green]cd[/green] [cyan]{dir}[/cyan]  changes current working directory to given directory
-
-[green]clear[/green]  clears the terminal
-                   
-[green]play[/green] [cyan]{path}[/cyan]  the given audio file plays once
-[green]play[/green] [cyan]{option} {path}[/cyan]
-    [cyan]-r[/cyan]   the given audio file plays in repeat until stopped
-[green]play[/green] [cyan]{option} {dir}[/cyan]
-    [cyan]-d[/cyan]   the audio files of given directory play in alphabetical order
-    [cyan]-dr[/cyan]  the audio files of given directory play in alphabetical order and loop around until stopped
-    [cyan]-ds[/cyan]  the audio files of given directory play in shuffled order and loop around until stopped
-   
-[green]info[/green] [cyan]{path}[/cyan]  shows all available tags and their respective values for the given audio file.
-[green]info[/green] [cyan]{path} {tags}[/cyan]  hows only the provided tags (separate tags with space for multiple ones) and their respective values
-'''
-                            )
+            terminal_disp.help_msg()
         
         #list command
         elif command[0] == "ls":
@@ -60,8 +42,8 @@ def parse_command(raw_command):
 
         #clear command
         elif command[0] == "clear" and command_parts == 1:
-            player.clear_screen()
-            player.logo()
+            terminal_disp.clear_screen()
+            terminal_disp.logo()
         
         #play command
         elif command[0] == "play":
@@ -71,8 +53,8 @@ def parse_command(raw_command):
                     repeat = True
                     while repeat:
                         repeat = player.run_player(file_path, "single")[0]
-                    player.clear_screen()
-                    player.logo()
+                    terminal_disp.clear_screen()
+                    terminal_disp.logo()
                 else:
                     print("Please enter a valid file path.")
 
@@ -84,8 +66,8 @@ def parse_command(raw_command):
                         repeat = True
                         while repeat:
                             repeat = player.run_player(file_path, "repeat")[0]
-                        player.clear_screen()
-                        player.logo()
+                        terminal_disp.clear_screen()
+                        terminal_disp.logo()
 
 
 
@@ -107,8 +89,8 @@ def parse_command(raw_command):
                                         if i < 1:
                                             i = 1
                                         break
-                                player.clear_screen()
-                                player.logo()
+                                terminal_disp.clear_screen()
+                                terminal_disp.logo()
                             else:
                                 print("No audio files found.")
 
@@ -125,8 +107,8 @@ def parse_command(raw_command):
                                         elif i > len(audio_files):
                                             i = 1
                                         break
-                                player.clear_screen()
-                                player.logo()
+                                terminal_disp.clear_screen()
+                                terminal_disp.logo()
                             else:
                                 print("No audio files found.")
 
@@ -143,8 +125,8 @@ def parse_command(raw_command):
                                         elif i > len(audio_files):
                                             i = 1
                                         break
-                                player.clear_screen()
-                                player.logo()
+                                terminal_disp.clear_screen()
+                                terminal_disp.logo()
                             else:
                                 print("No audio files found.")
                 else:
@@ -158,11 +140,17 @@ def parse_command(raw_command):
                file_path = Path(command[1]).expanduser().resolve()
                par = tuple(command[2:]) or None
                if os.path.exists(file_path):
-                   console.print(player.get_metadata(file_path, par), highlight=False)
+                   console.print(metadata.get_metadata(file_path, par), highlight=False)
                else:
                    print("Please enter a valid file path.")
             else:
                 print("Please enter a valid file path and parameters.")
+
+        #convert command
+        elif command[0] == "convert" and command_parts == 3:
+            file_path = Path(command[1]).expanduser().resolve()
+            if os.path.exists(file_path):
+                converter.convert(file_path, command[2])
         #invalid command
         else:
             print("Invalid command! Enter 'help' to display command list.")

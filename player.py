@@ -1,8 +1,6 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
-from rich.console import Console
-console = Console()
 from rich.live import Live
 from rich.align import Align
 from rich.console import Group
@@ -10,11 +8,13 @@ from rich.panel import Panel
 from rich.progress import Progress, BarColumn, TextColumn
 from rich.layout import Layout
 from mutagen import File
-from re import match
 import sys
 import termios
 import tty
 import select
+
+import metadata
+import terminal_disp
 
 
 #create rich layout
@@ -100,24 +100,6 @@ def make_player():
         TextColumn("{task.fields[suffix]}", justify="right"),
     )
 
-#clear the terminal
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-#print logo
-def logo():
-    console.print(Align.center('''[bold][#5900ab]
-[#5900ab] _____  _           _   _                [#00d0ff]_____                  
-[#5900ab]|  __ \\| |         | | | |              [#00d0ff]/ ____|                 
-[#5900ab]| |__) | |__  _   _| |_| |__  _ __ ___ [#00d0ff]| (___  _   _ _ __   ___ 
-[#5900ab]|  _  /| '_ \\| | | | __| '_ \\| '_ ` _ \\ [#00d0ff]\\___ \\| | | | '_ \\ / __|
-[#5900ab]| | \\ \\| | | | |_| | |_| | | | | | | | |[#00d0ff]____) | |_| | | | | (__ 
-[#5900ab]|_|  \\_\\_| |_|\\__, |\\__|_| |_|_| |_| |_|[#00d0ff]_____/ \__, |_| |_|\\___|
-[#5900ab]               __/ |                         [#00d0ff]   __/ |           
-[#5900ab]              |___/                           [#00d0ff] |___/            
-'''
-    ))
-
 #format time in mm:ss.xx format
 def format_time(milliseconds):
     min = int((milliseconds // 1000) // 60)
@@ -125,94 +107,6 @@ def format_time(milliseconds):
     mil = milliseconds % 1000
     hund = int(mil // 10)
     return f"{min:02}:{sec:02}.{hund:02}"
-
-#format time to milliseconds
-def unformat_time(time_str):
-    min, sec = time_str.split(":")
-    sec, hund = sec.split(".")
-    milliseconds = (
-        int(min) * 60 * 1000 + int(sec) * 1000 + int(hund) * 10)
-    return milliseconds
-
-#get meatadata
-def get_metadata(file_path, tags = None):
-    try:
-        audio = File(file_path)
-
-        if audio is None:
-            print(f"Player error: Could not open file {file_path}")
-            return None
-        
-        lines = []
-
-        if tags is None:
-            for key, value in audio.items():
-                if isinstance(value, list):
-                    value = "; ".join(str(v) for v in value)
-
-                    lines.append(f"[green]{key}[/green]: {value}")
-        else:
-            for key, value in audio.items():
-                if isinstance(value, list):
-
-                    if key in tags:
-                        value = "; ".join(str(v) for v in value)
-
-                        lines.append(f"[green]{key}[/green]: {value}")
-        
-        return "\n".join(lines)
-    
-    except Exception as e:
-        print(f"Player error: Error extracting metadata: {e}")
-        return None
-
-#get title and artist info
-def get_ti_ar(file_path):
-    try:
-        audio = File(file_path)
-
-        if audio is None:
-            return "Unknown Title", "Unknown Artist"
-        
-        title = audio.get("title", ["Unknown Title"])[0]
-        artist = audio.get("artist", ["Unknown Artist"])[0]
-
-        return title, artist
-    
-    except Exception as e:
-        print(f"Player error: Error extracting metadata: {e}")
-        return "Unknown Title", "Unknown Artist"
-
-#get lrc data from the audio file
-def get_lrc(file_path):
-    try:
-        audio = File(file_path)
-
-        if audio is None:
-            print(f"Player error: Could not open file {file_path}")
-            return None
-
-        lrc_tag_names = ['SYLT', 'SYLT::eng', 'LYRICS', 'LYRICS:eng', 'LYRICS-ENG', 'LYRICS_EN', 'LYRICS_SYNCED', 'SYNCEDLYRICS']
-
-        for tag_name in lrc_tag_names:
-            if tag_name in audio:
-                return audio[tag_name][0]
-        return None
-
-    except Exception as e:
-        print(f"Player error: Error extracting LRC data: {e}")
-        return None
-
-#get lyric lines without the tags from the lrc data
-def format_lrc(lrc_data):
-    timestamp = r"^\[\d{2}:\d{2}\.\d{2}\]"
-    lrc_lines = lrc_data.split("\n")
-    lyrics = [[line[1:9],line[10:].strip()] for line in lrc_lines if match(timestamp, line)]
-    lyrics.insert(0,['00:00.00', ""])
-    for x in lyrics:
-        if x[1] == "":
-            x[1] = "♫"
-    return lyrics
 
 # music player
 def run_player(file_path, mode=None):
@@ -232,15 +126,15 @@ def run_player(file_path, mode=None):
 
         total_length = int(pygame.mixer.Sound(file_path).get_length() * 1000)
 
-        title, artist = get_ti_ar(file_path)
+        title, artist = metadata.get_ti_ar(file_path)
 
         lyrics_exist = False
-        raw_lrc = get_lrc(file_path)
+        raw_lrc = metadata.get_lrc(file_path)
         if raw_lrc is not None:
-            lyrics = format_lrc(raw_lrc)
+            lyrics = metadata.format_lrc(raw_lrc)
             lyrics_exist = True
 
-        clear_screen()
+        terminal_disp.clear_screen()
 
         layout["header"].update(make_header(title, artist, mode))
         layout["lyrics"].update(
@@ -308,10 +202,9 @@ def run_player(file_path, mode=None):
                                     pygame.mixer.music.stop()
                                     return (True, int(mode[1])+1)
 
-
                 if not paused:
                     if lyrics_exist and lyric_index < len(lyrics):
-                        if unformat_time(lyrics[lyric_index][0]) <= current_time:
+                        if metadata.unformat_time(lyrics[lyric_index][0]) <= current_time:
                             layout["lyrics"].update(make_lyrics((
                                 lyrics[lyric_index - 2][1] if lyric_index > 1 else "",
                                 lyrics[lyric_index - 1][1] if lyric_index > 0 else "",
@@ -341,5 +234,5 @@ def run_player(file_path, mode=None):
     
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        clear_screen()
+        terminal_disp.clear_screen()
         print("Exitting...")
