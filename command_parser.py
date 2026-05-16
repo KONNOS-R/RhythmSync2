@@ -1,7 +1,6 @@
 import os
 from rich.console import Console
 console = Console()
-from rich.align import Align
 from pathlib import Path
 from random import shuffle
 import shlex
@@ -32,7 +31,7 @@ def parse_command(raw_command):
             else:
                 print("Please enter valid parameters.")
 
-        #change dir command
+        #change directory command
         elif command[0] == "cd" and command_parts == 2:
             directory = str(Path(command[1]).expanduser().resolve())
             if os.path.exists(directory):
@@ -68,8 +67,6 @@ def parse_command(raw_command):
                             repeat = player.run_player(file_path, "repeat")[0]
                         terminal_disp.clear_screen()
                         terminal_disp.logo()
-
-
 
                     elif par[:2] == "-d": #directory modes
                         extensions = (".mp3", ".flac", ".wav", ".ogg")
@@ -155,6 +152,7 @@ def parse_command(raw_command):
                 converter.convert(input_path, output_path)
             else:
                 print("Please enter valid file paths.")
+
         #invalid command
         else:
             print("Invalid command! Enter 'help' to display command list.")

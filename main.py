@@ -1,26 +1,53 @@
 import os
-from rich.align import Align
 import sys
 import termios
 import tty
 import signal
 
-import player
 import terminal_disp
 import command_parser
 
 
-#cli input
+#capture key strokes
 def getch():
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
+
     try:
         tty.setraw(fd)
         ch = sys.stdin.read(1)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
     return ch
 
+#history redraw logic
+def redraw_input(prompt, buffer):
+    global last_rendered_lines
+
+    cols = os.get_terminal_size().columns
+    full = prompt + buffer
+
+    lines = max(1, (len(full) // cols) + 1)
+
+    for _ in range(last_rendered_lines - 1):
+        sys.stdout.write("\x1b[F")
+
+    for i in range(last_rendered_lines):
+        sys.stdout.write("\r\x1b[2K")
+
+        if i < last_rendered_lines - 1:
+            sys.stdout.write("\x1b[E")
+
+    for _ in range(last_rendered_lines - 1):
+        sys.stdout.write("\x1b[F")
+
+    sys.stdout.write("\r" + full)
+    sys.stdout.flush()
+
+    last_rendered_lines = lines
+
+#path autocompletion
 def complete_path(text):
     if not text:
         return text
@@ -28,7 +55,6 @@ def complete_path(text):
     def complete_fragment(fragment):
         fragment = fragment.strip()
 
-        # Remove surrounding quotes
         if (fragment.startswith('"') and fragment.endswith('"')) or (
             fragment.startswith("'") and fragment.endswith("'")
         ):
@@ -37,6 +63,7 @@ def complete_path(text):
         fragment = os.path.expanduser(fragment)
 
         dir_name, prefix = os.path.split(fragment)
+
         if dir_name in ("", "."):
             dir_name = "."
 
@@ -46,6 +73,7 @@ def complete_path(text):
             return None
 
         exact = [e for e in entries if e.name == prefix]
+
         if len(exact) == 1:
             chosen = exact[0]
         else:
@@ -53,12 +81,9 @@ def complete_path(text):
             if len(matches) != 1:
                 return None
             chosen = matches[0]
-
         completed = os.path.join(dir_name, chosen.name)
-
         if chosen.is_dir():
             completed += os.sep
-
         return completed
 
     quote_hits = [
@@ -76,31 +101,29 @@ def complete_path(text):
         return text
 
     parts = text.split()
+
     for k in range(len(parts), 0, -1):
         base = " ".join(parts[:-k])
         fragment = " ".join(parts[-k:])
-
         completed = complete_fragment(fragment)
         if completed:
             if " " in completed:
                 completed = f'"{completed}"'
             return (base + " " if base else "") + completed
-
     return text
 
+#cli input
 def input_cli(prompt="> "):
     global history_index
 
-    sys.stdout.write(prompt)
-    sys.stdout.flush()
-
     buffer = ""
     history_index = len(history)
+    redraw_input(prompt, buffer)
 
     while True:
         ch = getch()
 
-         # CTRL+C
+        # CTRL+C
         if ch == "\x03":
             print()
             raise KeyboardInterrupt
@@ -108,8 +131,11 @@ def input_cli(prompt="> "):
         # CTRL+Z
         elif ch == "\x1a":
             print("\n[Suspended]")
-            # restore terminal before suspending
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, termios.tcgetattr(sys.stdin))
+            termios.tcsetattr(
+                sys.stdin.fileno(),
+                termios.TCSADRAIN,
+                termios.tcgetattr(sys.stdin)
+            )
             os.kill(os.getpid(), signal.SIGTSTP)
 
         # ENTER
@@ -119,48 +145,42 @@ def input_cli(prompt="> "):
                 history.append(buffer)
             return buffer
 
-        # BACKSPACE
+        #BACKSPACE
         elif ch == "\x7f":
-            buffer = buffer[:-1]
-            sys.stdout.write("\r" + prompt + buffer + " ")
-            sys.stdout.write("\r" + prompt + buffer)
-            sys.stdout.flush()
+            if buffer:
+                buffer = buffer[:-1]
+                redraw_input(prompt, buffer)
 
-        # TAB
+        #TAB
         elif ch == "\t":
             buffer = complete_path(buffer)
-            sys.stdout.write("\r" + prompt + buffer)
-            sys.stdout.flush()
+            redraw_input(prompt, buffer)
 
-        # ESC sequences
+        #ESC Sequences
         elif ch == "\x1b":
             next1 = getch()
             next2 = getch()
 
-            # UP arrow
+            #UP Arrow
             if next2 == "A":
                 if history:
                     history_index = max(0, history_index - 1)
                     buffer = history[history_index]
-                    sys.stdout.write("\r" + prompt + buffer + " " * 10)
-                    sys.stdout.write("\r" + prompt + buffer)
-                    sys.stdout.flush()
+                    redraw_input(prompt, buffer)
 
-            # DOWN arrow
+            #DOWN Arrow
             elif next2 == "B":
                 if history:
-                    history_index = min(len(history) - 1, history_index + 1)
+                    history_index = min(
+                        len(history) - 1,
+                        history_index + 1
+                    )
                     buffer = history[history_index]
-                    sys.stdout.write("\r" + prompt + buffer + " " * 10)
-                    sys.stdout.write("\r" + prompt + buffer)
-                    sys.stdout.flush()
+                    redraw_input(prompt, buffer)
 
         else:
             buffer += ch
-            sys.stdout.write(ch)
-            sys.stdout.flush()
-#/cliinput
-        
+            redraw_input(prompt, buffer)
 
 #main program
 def main():
@@ -168,23 +188,25 @@ def main():
 
     global history
     global history_index
+    global last_rendered_lines
+
     history = []
     history_index = -1
+    last_rendered_lines = 1
 
     terminal_disp.logo()
+
     while True:
         try:
             command_parser.parse_command(input_cli("> "))
-
         except KeyboardInterrupt:
-            print(f"Exitting...")
+            print("Exitting...")
             break
-
         except Exception as e:
             terminal_disp.clear_screen()
             terminal_disp.logo()
             print(f"Error: {e}")
-    
 
+#entry point
 if __name__ == "__main__":
     main()

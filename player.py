@@ -7,7 +7,6 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.progress import Progress, BarColumn, TextColumn
 from rich.layout import Layout
-from mutagen import File
 import sys
 import termios
 import tty
