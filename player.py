@@ -107,6 +107,14 @@ def format_time(milliseconds):
     hund = int(mil // 10)
     return f"{min:02}:{sec:02}.{hund:02}"
 
+#format time to milliseconds
+def unformat_time(time_str):
+    min, sec = time_str.split(":")
+    sec, hund = sec.split(".")
+    milliseconds = (
+        int(min) * 60 * 1000 + int(sec) * 1000 + int(hund) * 10)
+    return milliseconds
+
 # music player
 def run_player(file_path, mode=None):
     fd = sys.stdin.fileno()
@@ -203,7 +211,7 @@ def run_player(file_path, mode=None):
 
                 if not paused:
                     if lyrics_exist and lyric_index < len(lyrics):
-                        if metadata.unformat_time(lyrics[lyric_index][0]) <= current_time:
+                        if unformat_time(lyrics[lyric_index][0]) <= current_time:
                             layout["lyrics"].update(make_lyrics((
                                 lyrics[lyric_index - 2][1] if lyric_index > 1 else "",
                                 lyrics[lyric_index - 1][1] if lyric_index > 0 else "",

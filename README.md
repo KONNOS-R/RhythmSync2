@@ -133,4 +133,6 @@ play "My Music/song.mp3"
 play My\ Music/song.mp3
 ```
 
+- The **convert** command uses FFmpeg and may alter or corrupt metadata
+
 - Use `Ctrl+C` to stop playback or exit the app

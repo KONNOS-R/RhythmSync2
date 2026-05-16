@@ -123,12 +123,12 @@ def input_cli(prompt="> "):
     while True:
         ch = getch()
 
-        # CTRL+C
+        #CTRL+C
         if ch == "\x03":
             print()
             raise KeyboardInterrupt
 
-        # CTRL+Z
+        #CTRL+Z
         elif ch == "\x1a":
             print("\n[Suspended]")
             termios.tcsetattr(
@@ -138,7 +138,7 @@ def input_cli(prompt="> "):
             )
             os.kill(os.getpid(), signal.SIGTSTP)
 
-        # ENTER
+        #ENTER
         elif ch == "\r" or ch == "\n":
             print()
             if buffer.strip():
@@ -171,10 +171,7 @@ def input_cli(prompt="> "):
             #DOWN Arrow
             elif next2 == "B":
                 if history:
-                    history_index = min(
-                        len(history) - 1,
-                        history_index + 1
-                    )
+                    history_index = min(len(history) - 1, history_index + 1)
                     buffer = history[history_index]
                     redraw_input(prompt, buffer)
 
