@@ -148,9 +148,13 @@ def parse_command(raw_command):
 
         #convert command
         elif command[0] == "convert" and command_parts == 3:
-            file_path = Path(command[1]).expanduser().resolve()
-            if os.path.exists(file_path):
-                converter.convert(file_path, command[2])
+            input_path = Path(command[1]).expanduser().resolve()
+            output_path = Path(command[2]).expanduser().resolve()
+            output_dir = Path("/".join(command[2].split("/")[:-1])).expanduser().resolve()
+            if os.path.exists(input_path) and os.path.exists(output_dir):
+                converter.convert(input_path, output_path)
+            else:
+                print("Please enter valid file paths.")
         #invalid command
         else:
             print("Invalid command! Enter 'help' to display command list.")
