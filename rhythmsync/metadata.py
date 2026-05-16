@@ -27,7 +27,6 @@ def get_metadata(file_path, tags=None):
             print(f"Metadata error: Unsupported or unreadable file: {file_path}")
             return None
 
-        print(audio.pprint())
         tag_map = get_tag_map()
         lines = []
         reverse_map = {}
