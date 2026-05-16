@@ -5,10 +5,10 @@ from pathlib import Path
 from random import shuffle
 import shlex
 
-import player
-import metadata
-import converter
-import terminal_disp
+import rhythmsync.player as player
+import rhythmsync.metadata as metadata
+import rhythmsync.converter as converter
+import rhythmsync.terminal_disp as terminal_disp
 
 
 def parse_command(raw_command):

@@ -4,8 +4,8 @@ import termios
 import tty
 import signal
 
-import terminal_disp
-import command_parser
+import rhythmsync.terminal_disp as terminal_disp
+import rhythmsync.command_parser as command_parser
 
 
 #capture key strokes

@@ -12,8 +12,8 @@ import termios
 import tty
 import select
 
-import metadata
-import terminal_disp
+import rhythmsync.metadata as metadata
+import rhythmsync.terminal_disp as terminal_disp
 
 
 #create rich layout

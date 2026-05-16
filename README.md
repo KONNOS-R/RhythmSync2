@@ -6,13 +6,7 @@ CLI audio player that plays music while displaying synchronized lyrics (LRC).
 
 ## Features
 
-- Play single audio files:
-  - Once
-  - In loop (`-r`)
-- Play all supported audio files in a directory:
-  - Alphabetical order (`-d`)
-  - Alphabetical loop (`-dr`)
-  - Shuffle (`-ds`)
+- Play audio files in various modes
 - Display synchronized lyrics during playback
 - Show song metadata tags
 - Styled terminal music player UI
@@ -119,7 +113,7 @@ Supported tags include:
 ### Metadata
 
 - `info {path}` - Displays all available metadata.
-- `info {path}` [tags] - Displays only given metadata tags.
+- `info {path} [tags]` - Displays only given metadata tags.
 
 ### Converter
 
