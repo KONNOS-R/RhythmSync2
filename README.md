@@ -16,7 +16,7 @@ CLI audio player that plays music while displaying synchronized lyrics (LRC).
 - Display synchronized lyrics during playback
 - Show song metadata tags
 - Styled terminal music player UI
-- Convert audio files to other formats using ffmpeg
+- Convert audio files to other formats using FFmpeg
 - Player controls
   - Pause (`SPACE`)
   - Next (`RIGHT Arrow`)
@@ -108,10 +108,13 @@ Supported tags include:
 ### Playback
 
 - `play {path}` - Plays a single audio file once.
-- `play -r {path}` - Plays a single audio file in repeat mode until stopped (Ctrl+C).
-- `play -d {directory}` - Plays all supported audio files in alphabetical order.
-- `play -dr {directory}` - Plays all supported audio files in alphabetical order and loops until stopped (Ctrl+C).
-- `play -ds {directory}` - Plays all supported audio files in shuffled order and loops until stopped (Ctrl+C).
+- `play -r {path}` - Plays a single audio file in a loop until stopped (Ctrl+C).
+- `play -d {directory}` - Plays all supported audio files in the specified directory (non-recursive) in alphabetical order.
+- `play -dr {directory}` - Plays all supported audio files in the specified directory (non-recursive) in alphabetical order and loops until stopped (Ctrl+C).
+- `play -ds {directory}` - Plays all supported audio files in the specified directory (non-recursive) in shuffled order and loops until stopped (Ctrl+C).
+- `play -D {path}` - Plays all supported audio files in the specified directory (recursive) in alphabetical order.
+- `play -Dr {path}` - Plays all supported audio files in the specified directory (recursive) in alphabetical order and loops until stopped (Ctrl+C).
+- `play -Ds {path}` - Plays all supported audio files in the specified directory (recursive) in shuffled order and loops until stopped (Ctrl+C).
 
 ### Metadata
 

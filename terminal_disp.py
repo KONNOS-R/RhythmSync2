@@ -41,6 +41,9 @@ def help_msg():
     [cyan]-d[/cyan]   the audio files of given directory play in alphabetical order
     [cyan]-dr[/cyan]  the audio files of given directory play in alphabetical order and loop around until stopped
     [cyan]-ds[/cyan]  the audio files of given directory play in shuffled order and loop around until stopped
+    [cyan]-D[/cyan]   the audio files of given directory and its subdirectories play in alphabetical order
+    [cyan]-Dr[/cyan]  the audio files of given directory and its subdirectories play in alphabetical order and loop around until stopped
+    [cyan]-Ds[/cyan]  the audio files of given directory and its subdirectories play in shuffled order and loop around until stopped
    
 [green]info[/green] [cyan]{path}[/cyan]  shows all available tags and their respective values for the given audio file.
 [green]info[/green] [cyan]{path} {tags}[/cyan]  hows only the provided tags (separate tags with space for multiple ones) and their respective values

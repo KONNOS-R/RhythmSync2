@@ -126,6 +126,65 @@ def parse_command(raw_command):
                                 terminal_disp.logo()
                             else:
                                 print("No audio files found.")
+                    
+                    elif par[:2] == "-D": #recursive modes
+                        extensions = (".mp3", ".flac", ".wav", ".ogg")
+                        audio_files = [
+                            f for f in Path(file_path).rglob("*")
+                            if f.suffix.lower() in extensions
+                        ]
+
+                        if par == "-D": #dirs
+                            if audio_files:
+                                audio_files.sort()
+                                repeat = True
+                                i = 1
+                                while i-1 < len(audio_files) and i >= 1 and repeat:
+                                    for j in range(i-1, len(audio_files)):
+                                        repeat, i = player.run_player(audio_files[j], f"directory {i} {len(audio_files)}")
+                                        if i < 1:
+                                            i = 1
+                                        break
+                                terminal_disp.clear_screen()
+                                terminal_disp.logo()
+                            else:
+                                print("No audio files found.")
+
+                        elif par == "-Dr": #dir repeat
+                            if audio_files:
+                                audio_files.sort()
+                                repeat = True
+                                i = 1
+                                while repeat:
+                                    for j in range(i-1, len(audio_files)):
+                                        repeat, i = player.run_player(audio_files[j], f"directory {i} {len(audio_files)}")
+                                        if i < 1:
+                                            i = len(audio_files)
+                                        elif i > len(audio_files):
+                                            i = 1
+                                        break
+                                terminal_disp.clear_screen()
+                                terminal_disp.logo()
+                            else:
+                                print("No audio files found.")
+
+                        elif par == "-Ds": #dir shuffle
+                            if audio_files:
+                                shuffle(audio_files)
+                                repeat = True
+                                i = 1
+                                while repeat:
+                                    for j in range(i-1, len(audio_files)):
+                                        repeat, i = player.run_player(audio_files[j], f"directory {i} {len(audio_files)}")
+                                        if i < 1:
+                                            i = len(audio_files)
+                                        elif i > len(audio_files):
+                                            i = 1
+                                        break
+                                terminal_disp.clear_screen()
+                                terminal_disp.logo()
+                            else:
+                                print("No audio files found.")
                 else:
                     print("Please enter a valid file path.") 
             else:
