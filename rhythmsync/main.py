@@ -52,19 +52,23 @@ def complete_path(text):
     if not text:
         return text
 
+    def escape_spaces(s: str) -> str:
+        return s.replace(" ", r"\ ")
+
+    def unescape_spaces(s: str) -> str:
+        return s.replace(r"\ ", " ")
+
     def complete_fragment(fragment):
         fragment = fragment.strip()
+        fragment = fragment.replace('"', '').replace("'", "")
 
-        if (fragment.startswith('"') and fragment.endswith('"')) or (
-            fragment.startswith("'") and fragment.endswith("'")
-        ):
-            fragment = fragment[1:-1]
+        fragment = unescape_spaces(fragment)
 
         fragment = os.path.expanduser(fragment)
 
         dir_name, prefix = os.path.split(fragment)
 
-        if dir_name in ("", "."):
+        if not dir_name:
             dir_name = "."
 
         try:
@@ -72,44 +76,40 @@ def complete_path(text):
         except OSError:
             return None
 
-        exact = [e for e in entries if e.name == prefix]
+        matches = [e for e in entries if e.name.startswith(prefix)]
 
-        if len(exact) == 1:
-            chosen = exact[0]
+        if not matches:
+            return None
+
+        if len(matches) == 1:
+            chosen_name = matches[0].name
         else:
-            matches = [e for e in entries if e.name.startswith(prefix)]
-            if len(matches) != 1:
+            common = os.path.commonprefix([m.name for m in matches])
+            if not common or common == prefix:
                 return None
-            chosen = matches[0]
-        completed = os.path.join(dir_name, chosen.name)
-        if chosen.is_dir():
-            completed += os.sep
-        return completed
+            chosen_name = common
 
-    quote_hits = [
-        (text.rfind(q), q)
-        for q in ('"', "'")
-        if text.count(q) % 2 == 1 and text.rfind(q) != -1
-    ]
+        completed = os.path.join(dir_name, chosen_name)
 
-    if quote_hits:
-        start, quote_char = max(quote_hits)
-        fragment = text[start + 1:]
-        completed = complete_fragment(fragment)
-        if completed:
-            return text[:start + 1] + completed + quote_char
-        return text
+        try:
+            if os.path.isdir(completed):
+                completed += os.sep
+        except Exception:
+            pass
+
+        return escape_spaces(completed)
 
     parts = text.split()
 
     for k in range(len(parts), 0, -1):
         base = " ".join(parts[:-k])
         fragment = " ".join(parts[-k:])
+
         completed = complete_fragment(fragment)
+
         if completed:
-            if " " in completed:
-                completed = f'"{completed}"'
             return (base + " " if base else "") + completed
+
     return text
 
 #cli input

@@ -16,11 +16,9 @@ def reset_cli():
     terminal_disp.clear_screen()
     terminal_disp.logo()
 
-
 #supported extensions
 def is_audio_file(path: Path):
     return path.is_file() and path.suffix.lower() in (".mp3", ".flac", ".wav", ".ogg")
-
 
 #returns audio files in dir
 def get_audio_files(path: Path, recursive: bool = False):
@@ -31,7 +29,6 @@ def get_audio_files(path: Path, recursive: bool = False):
 
     return sorted([f for f in files if is_audio_file(f)])
 
-
 #single loop mode logic
 def player_loop(file_path: Path, mode: str):
     repeat = True
@@ -39,7 +36,6 @@ def player_loop(file_path: Path, mode: str):
     while repeat:
         result = player.run_player(str(file_path), mode)
         repeat = result[0]
-
 
 #directory modes logic
 def player_directory(files, mode, repeat_mode=False):
@@ -69,7 +65,6 @@ def player_directory(files, mode, repeat_mode=False):
         terminal_disp.clear_screen()
         terminal_disp.logo() 
 
-
 # command parser
 def parse_command(raw_command):
     if not raw_command.strip():
@@ -88,19 +83,13 @@ def parse_command(raw_command):
     elif cmd == "ls":
 
         if command_parts == 1:
-            console.print(
-                "   ".join(os.listdir()),
-                highlight=False
-            )
+            console.print(f"[blue]{'   '.join(os.listdir())}", highlight=False)
 
         elif command_parts == 2:
             directory = Path(command[1]).expanduser().resolve()
 
             if directory.exists():
-                console.print(
-                    "   ".join(os.listdir(directory)),
-                    highlight=False
-                )
+                console.print(f"[blue]{'   '.join(os.listdir(directory))}", highlight=False)
 
         else:
             print("Please enter valid parameters.")
