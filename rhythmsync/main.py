@@ -131,11 +131,11 @@ def input_cli(prompt="> "):
         #CTRL+Z
         elif ch == "\x1a":
             print("\n[Suspended]")
-            termios.tcsetattr(
-                sys.stdin.fileno(),
-                termios.TCSADRAIN,
-                termios.tcgetattr(sys.stdin)
-            )
+
+            # restore terminal BEFORE suspend
+            fd = sys.stdin.fileno()
+            termios.tcsetattr(fd, termios.TCSADRAIN, termios.tcgetattr(fd))
+
             os.kill(os.getpid(), signal.SIGTSTP)
 
         #ENTER
@@ -158,17 +158,20 @@ def input_cli(prompt="> "):
 
         #ESC Sequences
         elif ch == "\x1b":
-            next1 = getch()
-            next2 = getch()
+            try:
+                next1 = getch()
+                next2 = getch()
+            except Exception:
+                continue
 
-            #UP Arrow
+            #UP
             if next2 == "A":
                 if history:
                     history_index = max(0, history_index - 1)
                     buffer = history[history_index]
                     redraw_input(prompt, buffer)
 
-            #DOWN Arrow
+            #DOWN
             elif next2 == "B":
                 if history:
                     history_index = min(len(history) - 1, history_index + 1)
@@ -183,9 +186,7 @@ def input_cli(prompt="> "):
 def main():
     terminal_disp.clear_screen()
 
-    global history
-    global history_index
-    global last_rendered_lines
+    global history, history_index, last_rendered_lines
 
     history = []
     history_index = -1

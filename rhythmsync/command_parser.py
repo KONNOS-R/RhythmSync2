@@ -90,6 +90,8 @@ def parse_command(raw_command):
 
             if directory.exists():
                 console.print(f"[blue]{'   '.join(os.listdir(directory))}", highlight=False)
+            else:
+                print("Please enter a valid path.")
 
         else:
             print("Please enter valid parameters.")
@@ -101,7 +103,7 @@ def parse_command(raw_command):
         if directory.exists():
             os.chdir(directory)
         else:
-            print("Please enter a valid file path.")
+            print("Please enter a valid path.")
 
     # clear command
     elif cmd == "clear" and command_parts == 1:
